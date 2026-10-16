@@ -1,0 +1,13 @@
+frontend/node_modules/
+frontend/dist/
+frontend/vite.log
+frontend/vite-error.log
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/db.sqlite3
+backend/unused.sqlite3
+backend/media/
+backend/server.log
+backend/server-error.log
+*.py[cod]
