@@ -1,1 +1,59 @@
-.list-heading{margin-bottom:23px}.table-panel{background:#fff;border:1px solid #edf0f5;border-radius:12px;box-shadow:0 5px 20px rgba(35,52,82,.025);overflow:hidden}.table-toolbar{min-height:70px;padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:1px solid #edf0f5}.table-search{height:35px;width:min(350px,42%);border:1px solid #e9edf3;border-radius:8px;display:flex;align-items:center;padding:0 10px;gap:8px;color:#9ba5b3}.table-search input{border:0;outline:none;min-width:0;flex:1;font-size:10px;color:#38465a;background:transparent}.table-search input::placeholder{color:#a2abb8}.table-search button{border:0;background:none;padding:2px;color:#8994a4}.table-filters{display:flex;align-items:center;gap:8px}.table-filters label{display:flex;align-items:center;gap:5px;color:#748195;font-size:10px;padding-right:4px}.table-filters select{height:34px;border:1px solid #e9edf3;background:white;border-radius:7px;color:#667488;font-size:9px;padding:0 25px 0 9px}.table-scroll{overflow-x:auto}.athletes-table{width:100%;border-collapse:collapse;white-space:nowrap}.athletes-table th{height:42px;background:#fafbfd;color:#9aa4b2;text-align:left;font-size:8px;letter-spacing:.55px;font-weight:700;padding:0 10px}.athletes-table th:first-child,.athletes-table td:first-child{padding-left:18px;width:38px}.athletes-table th:last-child,.athletes-table td:last-child{padding-right:15px}.athletes-table th:nth-child(2){display:table-cell}.athletes-table th:nth-child(2) svg{vertical-align:-2px}.athletes-table td{height:62px;border-top:1px solid #f0f2f6;padding:0 10px;font-size:10px;color:#667386}.athletes-table input[type=checkbox]{accent-color:#315fd2;width:13px;height:13px;vertical-align:middle}.id-cell{color:#98a2b0!important;font-size:9px!important}.athlete-cell{display:flex;align-items:center;gap:9px;min-width:180px}.athlete-avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:700;flex:none}.avatar-m{background:#e8eef9;color:#4c6d9e}.avatar-f{background:#f7eaf0;color:#af6785}.athlete-cell>span:last-child{display:flex;flex-direction:column;gap:4px}.athlete-cell b{font-size:10px;color:#344257;font-weight:600}.athlete-cell small{font-size:8px;color:#98a3b2}.sport-tag{background:#f4f6f9;border-radius:5px;padding:5px 7px;color:#677588;font-size:9px}.club-cell{display:flex;align-items:center;gap:6px}.club-cell i{width:7px;height:7px;border-radius:50%}.status-pill{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:5px 8px;font-size:8px;font-weight:600}.status-pill i{width:5px;height:5px;background:currentColor;border-radius:50%}.status-active{background:#eaf7f1;color:#228c68}.status-injured{background:#fff4e4;color:#c8852f}.status-suspended{background:#fff0ee;color:#d16f58}.status-retired{background:#f0f1f4;color:#778294}.row-arrow{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;color:#9ba5b3}.row-arrow:hover{background:#eef3ff;color:#315fd2}.table-footer{height:58px;padding:0 18px;border-top:1px solid #edf0f5;display:flex;justify-content:space-between;align-items:center;color:#939eae;font-size:9px}.table-footer b{color:#58667a;font-weight:600}.pagination{display:flex;gap:4px}.pagination button{height:26px;min-width:26px;padding:0 6px;border:1px solid #e9edf3;background:white;border-radius:6px;color:#768397;font-size:9px;display:grid;place-items:center}.pagination button.current{background:#315fd2;border-color:#315fd2;color:white}.pagination button:disabled{opacity:.4;cursor:default}.empty-state{text-align:center;padding:50px;color:#909bab;font-size:11px}@media(max-width:900px){.table-toolbar{align-items:flex-start;flex-direction:column}.table-search{width:100%}.table-filters{flex-wrap:wrap}.athletes-table{min-width:920px}}@media(max-width:540px){.list-heading .heading-actions{display:grid;grid-template-columns:.7fr 1.3fr}.list-heading .button-primary,.list-heading .button-secondary{font-size:9px;padding:0 8px}.table-panel{margin:0 -3px}.table-filters label span{display:none}.table-footer{padding:0 12px}.table-footer>span{font-size:8px}.pagination{gap:2px}.pagination button{min-width:23px;height:24px}}
+.list-heading{margin-bottom:23px}
+.table-panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 5px 20px rgba(35,52,82,.025);overflow:hidden}
+.table-toolbar{min-height:70px;padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:1px solid var(--line)}
+.table-search{height:35px;width:min(350px,42%);border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;padding:0 10px;gap:8px;color:var(--muted)}
+.table-search input{border:0;outline:none;min-width:0;flex:1;font-size:10px;color:var(--ink);background:transparent}
+.table-search input::placeholder{color:var(--muted)}
+.table-search button{border:0;background:none;padding:2px;color:var(--muted)}
+.table-filters{display:flex;align-items:center;gap:8px}
+.table-filters label{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:10px;padding-right:4px}
+.table-filters select{height:34px;border:1px solid var(--line);background:var(--panel-2);border-radius:7px;color:var(--muted);font-size:9px;padding:0 25px 0 9px}
+.table-scroll{overflow-x:auto}
+.athletes-table{width:100%;border-collapse:collapse;white-space:nowrap}
+.athletes-table th{height:42px;background:var(--panel-2);color:var(--muted);text-align:left;font-size:8px;letter-spacing:.55px;font-weight:700;padding:0 10px}
+.athletes-table th:first-child,.athletes-table td:first-child{padding-left:18px;width:38px}
+.athletes-table th:last-child,.athletes-table td:last-child{padding-right:15px}
+.athletes-table th:nth-child(2){display:table-cell}
+.athletes-table th:nth-child(2) svg{vertical-align:-2px}
+.athletes-table td{height:62px;border-top:1px solid var(--line);padding:0 10px;font-size:10px;color:var(--muted)}
+.athletes-table input[type=checkbox]{accent-color:var(--blue);width:13px;height:13px;vertical-align:middle}
+.id-cell{color:var(--muted)!important;font-size:9px!important}
+.athlete-cell{display:flex;align-items:center;gap:9px;min-width:180px}
+.athlete-avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:700;flex:none}
+.avatar-m{background:rgba(45,123,255,.16);color:var(--blue)}
+.avatar-f{background:rgba(240,98,107,.16);color:var(--red)}
+.athlete-cell>span:last-child{display:flex;flex-direction:column;gap:4px}
+.athlete-cell b{font-size:10px;color:var(--blue);font-weight:600}
+.athlete-cell small{font-size:8px;color:var(--muted)}
+.sport-tag{background:var(--panel-2);border-radius:5px;padding:5px 7px;color:var(--muted);font-size:9px}
+.club-cell{display:flex;align-items:center;gap:6px}
+.club-cell i{width:7px;height:7px;border-radius:50%}
+.status-pill{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:5px 8px;font-size:8px;font-weight:600}
+.status-pill i{width:5px;height:5px;background:currentColor;border-radius:50%}
+.status-active{background:rgba(34,197,139,.16);color:var(--green)}
+.status-injured{background:rgba(240,160,75,.16);color:var(--orange)}
+.status-suspended{background:rgba(240,98,107,.16);color:var(--red)}
+.status-retired{background:var(--panel-2);color:var(--muted)}
+.row-arrow{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;color:var(--muted)}
+.row-arrow:hover{background:rgba(45,123,255,.16);color:var(--blue)}
+.table-footer{height:58px;padding:0 18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:9px}
+.table-footer b{color:var(--ink);font-weight:600}
+.pagination{display:flex;gap:4px}
+.pagination button{height:26px;min-width:26px;padding:0 6px;border:1px solid var(--line);background:var(--panel-2);border-radius:6px;color:var(--muted);font-size:9px;display:grid;place-items:center}
+.pagination button.current{background:var(--blue);border-color:var(--blue);color:#fff}
+.pagination button:disabled{opacity:.4;cursor:default}
+.empty-state{text-align:center;padding:50px;color:var(--muted);font-size:11px}
+
+@media(max-width:900px){.table-toolbar{align-items:flex-start;flex-direction:column}
+.table-search{width:100%}
+.table-filters{flex-wrap:wrap}
+.athletes-table{min-width:920px}}
+
+@media(max-width:540px){.list-heading .heading-actions{display:grid;grid-template-columns:.7fr 1.3fr}
+.list-heading .button-primary,.list-heading .button-secondary{font-size:9px;padding:0 8px}
+.table-panel{margin:0 -3px}
+.table-filters label span{display:none}
+.table-footer{padding:0 12px}
+.table-footer>span{font-size:8px}
+.pagination{gap:2px}
+.pagination button{min-width:23px;height:24px}}

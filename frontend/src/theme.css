@@ -1,0 +1,24 @@
+:root {
+  --bg: #070d1b;          
+  --panel: #0d1630;       
+  --panel-2: #111c3a;     
+
+  --line: #1c2a4a;
+
+  --ink: #e8eefc;        
+  --muted: #7d8bab;       
+
+  --blue: #2d7bff;
+  --blue-soft: #12274d;
+  --green: #22c58b;
+  --orange: #f0a04b;
+  --red: #f0626b;
+
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+:root,
+body {
+  background: var(--bg);
+  color: var(--ink);
+}

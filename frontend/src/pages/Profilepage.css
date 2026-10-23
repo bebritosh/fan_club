@@ -1,0 +1,78 @@
+.fc-back{display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;font-size:13.5px;color:var(--muted)}
+.fc-back:hover{color:var(--ink)}
+.fc-prof-msg{color:var(--muted);padding:40px;text-align:center}
+
+/* Шапка */
+.fc-prof-head{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:28px}
+.fc-prof-person{display:flex;align-items:center;gap:18px}
+.fc-prof-person h1{margin:0 0 10px;font:700 24px/1.2 'Inter',sans-serif;letter-spacing:-.3px}
+.fc-prof-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fc-chip{display:inline-flex;align-items:center;gap:7px;height:24px;padding:0 10px;border-radius:20px;background:var(--panel-2);border:1px solid var(--line);font-size:12px;color:var(--muted)}
+.fc-chip i{width:8px;height:8px;border-radius:50%}
+.fc-prof-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.fc-prof-stats>div{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);min-width:0}
+.fc-prof-stats span{font-size:12px;color:var(--muted)}
+.fc-prof-stats b{font:600 17px 'Inter',sans-serif;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fc-prof-stats small{font-size:11px;color:var(--muted)}
+.fc-prof-actions{display:flex;gap:8px}
+.fc-btn.danger{padding:0 11px;color:var(--red)}
+.fc-btn.danger:hover{background:rgba(240,98,107,.15)}
+
+.fc-prof-tabs{margin:18px 0 16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+
+/* Обзор: три колонки */
+.fc-overview{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:16px;align-items:start}
+.fc-two{display:grid;grid-template-columns:minmax(0,640px);gap:16px}
+.fc-demo{font-size:10.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:rgba(240,160,75,.14);color:var(--orange)}
+
+/* Антропометрия */
+.fc-anthro{display:flex;align-items:center;gap:20px}
+.fc-anthro-list{margin:0;flex:1;display:grid;gap:14px}
+.fc-anthro-list div{display:flex;flex-direction:column;gap:2px}
+.fc-anthro-list dt{font-size:12px;color:var(--muted)}
+.fc-anthro-list dd{margin:0;font:600 18px 'Inter',sans-serif;color:var(--ink)}
+
+/* Состав тела */
+.fc-comp{display:flex;align-items:center;gap:16px;margin-bottom:6px}
+.fc-comp-donut{position:relative;width:132px;height:132px;flex:none}
+.fc-comp-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.fc-comp-center b{font:700 20px 'Inter',sans-serif;color:var(--ink)}
+.fc-comp-center span{font-size:10.5px;color:var(--muted)}
+.fc-comp-list{list-style:none;margin:0;padding:0;flex:1;display:grid;gap:12px}
+.fc-comp-list li{display:flex;justify-content:space-between;gap:10px;font-size:13px}
+.fc-comp-list span{color:var(--muted)}
+.fc-comp-list b{color:var(--ink);font-weight:600;white-space:nowrap}
+.fc-trend{height:150px;margin-top:10px}
+.fc-trend.tall{height:260px}
+.fc-trend-legend{display:flex;justify-content:center;gap:18px;margin-top:6px;font-size:12px;color:var(--muted)}
+.fc-trend-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+
+/* Динамика показателей */
+.fc-dyn{list-style:none;margin:0;padding:0}
+.fc-dyn li{display:grid;grid-template-columns:1fr auto 64px;gap:12px;align-items:center;padding:13px 0;border-top:1px solid var(--line);font-size:13px}
+.fc-dyn li:first-child{border-top:0;padding-top:2px}
+.fc-dyn span{color:var(--muted)}
+.fc-dyn b{color:var(--ink);font-weight:600;white-space:nowrap}
+.fc-dyn em{display:inline-flex;align-items:center;justify-content:flex-end;gap:2px;font-style:normal;font-weight:600;color:var(--green)}
+
+/* Остальные вкладки */
+.fc-text{margin:0;font-size:14px;line-height:1.7;color:var(--muted)}
+.fc-awards{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.fc-awards li{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--orange)}
+.fc-awards b{color:var(--ink);font-weight:500;font-size:14px}
+
+@media(max-width:1280px){
+  .fc-prof-head{grid-template-columns:1fr auto}
+  .fc-prof-stats{grid-column:1/-1;order:3}
+  .fc-overview{grid-template-columns:1fr 1fr}
+}
+@media(max-width:900px){
+  .fc-overview{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .fc-prof-head{grid-template-columns:1fr}
+  .fc-prof-stats{grid-template-columns:1fr 1fr}
+  .fc-prof-tabs{overflow-x:auto;flex-wrap:nowrap}
+  .fc-tab{white-space:nowrap}
+  .fc-anthro{flex-direction:column}
+}

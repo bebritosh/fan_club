@@ -1,9 +1,90 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { IconActivity, IconBell, IconCalendarEvent, IconChartBar, IconChevronDown, IconLayoutDashboard, IconMenu2, IconSettings, IconShieldCheck, IconTransfer, IconUsers, IconX, IconBuildingStadium } from '@tabler/icons-react';
 import { useState } from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { IconBell, IconCalendar, IconChartBar, IconFileText, IconHome, IconLogout, IconMenu2, IconSearch, IconSettings, IconTransfer, IconUsers, IconX } from '@tabler/icons-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import './Layout.css';
-const nav=[{to:'/',label:'Обзор',icon:IconLayoutDashboard},{to:'/athletes',label:'Спортсмены',icon:IconUsers},{to:'/clubs',label:'Клубы',icon:IconBuildingStadium},{to:'/transfers',label:'Трансферы',icon:IconTransfer},{to:'/events',label:'Мероприятия',icon:IconCalendarEvent},{to:'/analytics',label:'Аналитика',icon:IconChartBar}];
-const titles={'/':'Обзор','/athletes':'База спортсменов','/clubs':'Каталог клубов','/transfers':'История трансферов','/events':'Календарь мероприятий','/analytics':'Аналитика','/settings':'Настройки'};
-export default function Layout(){const [open,setOpen]=useState(false);const loc=useLocation();const {user,logout}=useAuth();const toast=useToast();const title=loc.pathname.startsWith('/athletes/')?'Карточка спортсмена':titles[loc.pathname]||'Fan Club';const name=[user?.first_name,user?.last_name].filter(Boolean).join(' ')||user?.username||'Менеджер';return <div className="app-shell"><aside className={`sidebar ${open?'sidebar-open':''}`}><div className="brand"><div className="brand-mark"><IconShieldCheck size={23}/></div><div className="brand-copy"><b>fan club</b><span>SPORTS MANAGEMENT</span></div><button className="mobile-close" onClick={()=>setOpen(false)}><IconX/></button></div><div className="workspace"><span className="workspace-icon">FC</span><span><b>Федерация спорта</b><small>Рабочее пространство</small></span><IconChevronDown size={15}/></div><div className="nav-caption">РАБОЧИЙ СТОЛ</div><nav>{nav.map(({to,label,icon:Icon})=><NavLink key={to} to={to} end={to==='/'} onClick={()=>setOpen(false)} className={({isActive})=>`nav-link ${isActive?'active':''}`}><Icon size={19} stroke={1.8}/><span>{label}</span>{to==='/athletes'&&<i className="nav-count">42</i>}</NavLink>)}</nav><div className="nav-caption manage-caption">УПРАВЛЕНИЕ</div><NavLink to="/settings" className={({isActive})=>`nav-link ${isActive?'active':''}`}><IconSettings size={19}/><span>Настройки</span></NavLink><div className="sidebar-bottom"><div className="help-card"><div className="help-icon"><IconActivity size={17}/></div><b>Нужна помощь?</b><p>Команда поддержки на связи</p><button onClick={()=>toast('Для помощи напишите администратору федерации.')}>Центр поддержки <span>↗</span></button></div><div className="sidebar-foot">© 2026 Fan Club <span>v1.0.0</span></div></div></aside><div className="main-column"><header className="topbar"><button className="menu-toggle" onClick={()=>setOpen(true)}><IconMenu2/></button><div className="breadcrumb"><span>Fan Club</span><i>/</i><b>{title}</b></div><div className="top-actions"><button className="icon-button notification" onClick={()=>toast('Новых уведомлений нет.')}><IconBell size={19}/><i/></button><div className="top-divider"/><button className="profile-chip" onClick={()=>location.assign('/settings')}><span className="avatar manager-avatar">{user?.avatar_url?<img src={user.avatar_url} alt=""/>:name.split(' ').map(x=>x[0]).slice(0,2).join('')}</span><span className="profile-text"><b>{name}</b><small>{user?.title||'Менеджер системы'}</small></span><IconChevronDown size={15}/></button><button className="logout-button" onClick={()=>{logout();toast('Вы вышли из системы.')}}>Выйти</button></div></header><main className="page-wrap"><Outlet/></main><footer className="page-footer">Fan Club · Система управления спортивными данными <span>Рабочая база обновлена</span></footer></div>{open&&<button className="sidebar-scrim" onClick={()=>setOpen(false)} aria-label="Закрыть меню"/>}</div>}
+
+const nav = [
+  { to: '/', label: 'Главная', icon: IconHome },
+  { to: '/athletes', label: 'База спортсменов', icon: IconUsers },
+  { to: '/analytics', label: 'Аналитика', icon: IconChartBar },
+  { to: '/reports', label: 'Отчёты', icon: IconFileText },
+  { to: '/events', label: 'Календарь', icon: IconCalendar },
+  { to: '/transfers', label: 'Трансферы', icon: IconTransfer },
+  { to: '/settings', label: 'Настройки', icon: IconSettings },
+];
+
+export function FcadLogo({ size = 26 }) {
+  return (
+    <span className="fc-logo">
+      <svg width={size + 6} height={size} viewBox="0 0 38 30" aria-hidden="true">
+        <defs>
+          <linearGradient id="fcg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#38d0ff" />
+            <stop offset="1" stopColor="#2d6bff" />
+          </linearGradient>
+        </defs>
+        <path d="M6 4h26l-3 7H13l-1.5 3.5H26l-3 7H8.5L6 26H1z" fill="url(#fcg)" />
+        <path d="M30 14h6l-6 12h-6z" fill="#22c58b" opacity=".9" />
+      </svg>
+      <b>FCAD</b>
+    </span>
+  );
+}
+
+export default function Layout() {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState('');
+  const { user, logout } = useAuth();
+  const toast = useToast();
+  const navigate = useNavigate();
+  const name = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.username || 'Менеджер';
+  const initials = name.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
+  const today = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  const search = e => {
+    e.preventDefault();
+    navigate(`/athletes${q.trim() ? `?q=${encodeURIComponent(q.trim())}` : ''}`);
+  };
+
+  return (
+    <div className="fc-shell">
+      <aside className={`fc-sidebar ${open ? 'open' : ''}`}>
+        <div className="fc-sidebar-head">
+          <FcadLogo />
+          <button className="fc-close" onClick={() => setOpen(false)} aria-label="Закрыть меню"><IconX size={20} /></button>
+        </div>
+        <nav className="fc-nav">
+          {nav.map(({ to, label, icon: Icon }) => (
+            <NavLink key={to} to={to} end={to === '/'} onClick={() => setOpen(false)} className={({ isActive }) => `fc-link ${isActive ? 'active' : ''}`}>
+              <Icon size={19} stroke={1.7} />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+        <div className="fc-sidebar-foot">FCAD · 2026</div>
+      </aside>
+
+      <div className="fc-main">
+        <header className="fc-topbar">
+          <button className="fc-burger" onClick={() => setOpen(true)} aria-label="Меню"><IconMenu2 size={22} /></button>
+          <form className="fc-search" onSubmit={search}>
+            <IconSearch size={17} />
+            <input value={q} onChange={e => setQ(e.target.value)} placeholder="Поиск по имени, ID, клубу..." />
+          </form>
+          <div className="fc-top-right">
+            <span className="fc-date">{today}</span>
+            <button className="fc-icon-btn" onClick={() => toast('Новых уведомлений нет.')} aria-label="Уведомления"><IconBell size={18} /><i /></button>
+            <button className="fc-icon-btn" onClick={() => { logout(); toast('Вы вышли из системы.'); }} aria-label="Выйти"><IconLogout size={18} /></button>
+            <button className="fc-avatar" onClick={() => navigate('/settings')} title={name}>
+              {user?.avatar_url ? <img src={user.avatar_url} alt="" /> : initials}
+            </button>
+          </div>
+        </header>
+        <main className="fc-content"><Outlet /></main>
+      </div>
+      {open && <button className="fc-scrim" onClick={() => setOpen(false)} aria-label="Закрыть меню" />}
+    </div>
+  );
+}

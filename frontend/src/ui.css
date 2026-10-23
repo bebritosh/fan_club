@@ -1,0 +1,85 @@
+/* ===== FCAD UI kit: общие классы для всех новых страниц ===== */
+
+/* Заголовок страницы */
+.fc-page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.fc-page-head h1{margin:0;font:700 26px/1.2 'Inter',sans-serif;letter-spacing:-.3px;color:var(--ink)}
+.fc-page-head p{margin:6px 0 0;font-size:14px;color:var(--muted)}
+.fc-page-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* Карточка */
+.fc-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.fc-card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.fc-card-head h2{margin:0;font:600 15px/1.3 'Inter',sans-serif;color:var(--ink)}
+
+/* Кнопки */
+.fc-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;border-radius:9px;border:1px solid transparent;font:600 13.5px 'Inter',sans-serif;cursor:pointer;transition:filter .15s,background .15s;white-space:nowrap}
+.fc-btn-primary{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(45,123,255,.3)}
+.fc-btn-primary:hover{filter:brightness(1.1)}
+.fc-btn-ghost{background:var(--panel-2);border-color:var(--line);color:var(--ink)}
+.fc-btn-ghost:hover{background:#16224a}
+.fc-btn:disabled{opacity:.5;cursor:default}
+
+/* Ссылка «Смотреть все» */
+.fc-more{display:inline-flex;align-items:center;gap:2px;font-size:13px;font-weight:500;color:#4d9bff}
+.fc-more:hover{text-decoration:underline}
+
+/* Поля ввода */
+.fc-input,.fc-select{width:100%;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2);color:var(--ink);font:400 13.5px 'Inter',sans-serif;outline:none}
+.fc-input:focus,.fc-select:focus{border-color:rgba(45,123,255,.7);box-shadow:0 0 0 3px rgba(45,123,255,.18)}
+.fc-input::placeholder{color:var(--muted)}
+
+/* Вкладки */
+.fc-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.fc-tab{height:34px;padding:0 14px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);font:500 13px 'Inter',sans-serif;cursor:pointer}
+.fc-tab:hover{color:var(--ink)}
+.fc-tab.active{background:rgba(45,123,255,.16);border-color:rgba(45,123,255,.35);color:#fff}
+
+/* Бейджи */
+.fc-badge{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:20px;font-size:12px;font-weight:600}
+.fc-badge-green{background:rgba(34,197,139,.15);color:var(--green)}
+.fc-badge-orange{background:rgba(240,160,75,.15);color:var(--orange)}
+.fc-badge-red{background:rgba(240,98,107,.15);color:var(--red)}
+.fc-badge-blue{background:rgba(45,123,255,.15);color:#4d9bff}
+
+/* Фото / инициалы спортсмена */
+.fc-ava{border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;font-weight:700;color:#cfe0ff;background:linear-gradient(135deg,#1c3a78,#12274d);border:1px solid var(--line)}
+.fc-ava img{width:100%;height:100%;object-fit:cover}
+.fc-ava.f{background:linear-gradient(135deg,#6b2a55,#3d1a3a);color:#ffd3ea}
+
+/* Подписи к полям форм */
+.fc-field{display:grid;gap:7px}
+.fc-field>span{font-size:12.5px;font-weight:500;color:var(--muted)}
+.fc-field>span i{color:var(--red);font-style:normal}
+
+/* Переключатель из нескольких кнопок (Все / Мужской / Женский) */
+.fc-seg{display:flex;padding:3px;gap:3px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2)}
+.fc-seg button{flex:1;height:32px;border:0;border-radius:7px;background:transparent;color:var(--muted);font:500 12.5px 'Inter',sans-serif;cursor:pointer}
+.fc-seg button:hover{color:var(--ink)}
+.fc-seg button.active{background:var(--blue);color:#fff}
+
+/* Таблица */
+.fc-table-wrap{overflow-x:auto}
+.fc-table{width:100%;border-collapse:collapse;white-space:nowrap}
+.fc-table th{padding:12px 14px;text-align:left;font-size:12px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line)}
+.fc-table td{padding:11px 14px;font-size:13.5px;color:var(--ink);border-top:1px solid var(--line)}
+.fc-table tbody tr:first-child td{border-top:0}
+.fc-table tr.clickable{cursor:pointer}
+.fc-table tr.clickable:hover td{background:rgba(45,123,255,.06)}
+.fc-table td.muted{color:var(--muted)}
+
+/* Пагинация */
+.fc-pager{display:flex;align-items:center;gap:6px}
+.fc-pager button{min-width:32px;height:32px;padding:0 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--muted);font:500 13px 'Inter',sans-serif;cursor:pointer;display:grid;place-items:center}
+.fc-pager button:hover:not(:disabled){color:var(--ink)}
+.fc-pager button.current{background:var(--blue);border-color:var(--blue);color:#fff}
+.fc-pager button:disabled{opacity:.4;cursor:default}
+.fc-pager span{color:var(--muted);padding:0 2px}
+
+/* Модальное окно */
+.fc-modal-backdrop{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:20px;overflow-y:auto;background:rgba(2,6,15,.75);backdrop-filter:blur(3px)}
+.fc-modal{width:min(560px,100%);margin:auto;position:relative;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.fc-modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.fc-modal-head h2{margin:0;font:600 18px 'Inter',sans-serif;color:var(--ink)}
+.fc-modal-close{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer}
+.fc-modal-close:hover{background:var(--panel-2);color:var(--ink)}
+.fc-modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}

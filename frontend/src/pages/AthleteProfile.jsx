@@ -1,22 +1,339 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { IconArrowLeft, IconCalendar, IconChevronRight, IconFileText, IconHeartRateMonitor, IconMapPin, IconRulerMeasure, IconScale, IconShieldCheck, IconTrophy, IconUsers, IconX } from '@tabler/icons-react';
-import { getAthlete, getClubs, saveAthlete } from '../services/api';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { IconArrowLeft, IconArrowUpRight, IconPencil, IconTrash, IconTrophy } from '@tabler/icons-react';
+import { CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { deleteAthlete, getAthlete, getClubs } from '../services/api';
+import { buildMetrics } from '../services/mockData';
 import { useToast } from '../context/ToastContext.jsx';
-import './AthleteProfile.css';
+import Avatar from '../components/Avatar.jsx';
+import BodySilhouette from '../components/BodySilhouette.jsx';
+import EditAthleteModal from '../components/EditAthleteModal.jsx';
+import './ProfilePage.css';
 
-export default function AthleteProfile(){
- const {id}=useParams();const notify=useToast();const [a,setA]=useState(null),[error,setError]=useState(false),[modal,setModal]=useState(false),[clubs,setClubs]=useState([]),[busy,setBusy]=useState(false);
- const refresh=()=>getAthlete(id).then(setA).catch(()=>setError(true));useEffect(()=>{refresh();getClubs().then(r=>setClubs(Array.isArray(r)?r:r.results||[])).catch(()=>{})},[id]);
- const submit=async e=>{e.preventDefault();setBusy(true);const d=Object.fromEntries(new FormData(e.currentTarget));try{await saveAthlete({number:Number(d.number),height:Number(d.height),weight:Number(d.weight),status:d.status,club:d.club?Number(d.club):null},id);setModal(false);await refresh();notify('Карточка спортсмена обновлена.')}catch(err){notify(Object.values(err.response?.data||{}).flat().join(' ')||'Не удалось обновить карточку.','error')}finally{setBusy(false)}};
- if(error)return <div className="profile-error"><h2>Спортсмен не найден</h2><Link to="/athletes">Вернуться к базе</Link></div>;if(!a)return <div className="profile-loading">Загружаем карточку спортсмена…</div>;
- const initials=a.name.split(' ').slice(0,2).map(x=>x[0]).join(''),clubColor=a.club_color||'#315fd2';
- return <div className="athlete-profile"><Link to="/athletes" className="back-link"><IconArrowLeft size={18}/> Все спортсмены</Link><div className="profile-hero"><div className="hero-person"><div className={`hero-avatar avatar-${a.gender==='Ж'?'f':'m'}`}>{initials}</div><div className="hero-name"><div className="eyebrow">ПРОФИЛЬ СПОРТСМЕНА · #{a.id}</div><h1>{a.full_name}</h1><div className="hero-meta"><span>{a.sport}</span><i/> <span>{a.position}</span><i/> <span className="hero-club"><b style={{background:clubColor}}/> {a.club||'Без клуба'}</span></div></div></div><span className={`status-pill ${a.status==='Активен'?'status-active':a.status==='Травма'?'status-injured':a.status==='Дисквалификация'?'status-suspended':'status-retired'}`}><i/>{a.status}</span></div>
- <div className="profile-grid"><div className="profile-main"><section className="panel info-panel"><div className="panel-head"><div><h2>Личная информация</h2><p>Основные данные спортсмена</p></div><button className="edit-button" onClick={()=>setModal(true)}>Редактировать</button></div><div className="info-grid"><Info icon={IconCalendar} label="Дата рождения" value={new Date(`${a.birth_date}T00:00:00`).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}/><Info icon={IconUsers} label="Возраст" value={`${a.age} лет`}/><Info icon={IconRulerMeasure} label="Рост" value={`${a.height} см`}/><Info icon={IconScale} label="Вес" value={`${a.weight} кг`}/><Info icon={IconMapPin} label="Текущий клуб" value={a.club||'Без клуба'}/><Info icon={IconShieldCheck} label="Игровой номер" value={`№ ${a.number}`}/></div></section>
- <section className="panel transfer-panel"><div className="panel-head"><div><h2>История трансферов</h2><p>Переходы между клубами</p></div><Link className="text-button" to="/transfers">Все трансферы <IconChevronRight size={18}/></Link></div><div className="timeline">{(a.transfers||[]).map((t,i)=><div className="timeline-item" key={t.id||i}><div className="timeline-rail"><i className={i===0?'rail-current':''}/>{i<a.transfers.length-1&&<span/>}</div><div className="timeline-content"><div><b>{t.to||'Клуб не указан'}</b><span className="transfer-type">{t.type||t.status}</span></div><p>{t.from||'Свободный агент'} <IconChevronRight size={15}/> {t.to||'Клуб не указан'}</p><small>{new Date(`${t.date}T00:00:00`).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</small></div></div>)}{!a.transfers?.length&&<div className="empty-state">История переходов ещё не добавлена.</div>}</div></section>
- <section className="panel awards-panel"><div className="panel-head"><div><h2>Достижения и награды</h2><p>Спортивные результаты</p></div></div><div className="awards-list">{(a.achievements||[]).map((x,i)=><div className="award-row" key={i}><div><IconTrophy size={20}/></div><span><b>{x}</b><small>Спортивное достижение</small></span><IconChevronRight size={17}/></div>)}</div></section></div>
- <aside className="profile-aside"><section className="panel club-profile-card"><div className="club-emblem" style={{background:clubColor}}>{a.club?.split(' ').map(x=>x[0]).join('').slice(0,2)||'FC'}</div><div className="club-label">ТЕКУЩИЙ КЛУБ</div><h3>{a.club||'Без клуба'}</h3><p>{a.sport} · #{a.number}</p><Link to="/clubs">Каталог клубов <IconChevronRight size={17}/></Link></section><section className="panel medical-card"><div className="medical-heading"><span><IconHeartRateMonitor size={19}/></span><div><h2>Медицинская карта</h2><p>Текущий статус здоровья</p></div></div><div className={`medical-status ${a.status==='Травма'?'medical-attention':'medical-ok'}`}><i/>{a.status==='Травма'?'Требует внимания':'Допущен к соревнованиям'}</div><p className="medical-copy">{a.medical||a.medical_notes||'Медицинские данные не заполнены.'}</p><button className="medical-link" onClick={()=>notify(a.medical||a.medical_notes||'Медицинские данные не заполнены.')}><IconFileText size={17}/> Показать медицинскую запись</button></section></aside></div>
- {modal&&<div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&setModal(false)}><form className="edit-modal" onSubmit={submit}><button type="button" className="modal-close" onClick={()=>setModal(false)}><IconX/></button><div className="eyebrow">ПРОФИЛЬ СПОРТСМЕНА</div><h2>Изменить данные</h2><div className="form-grid"><label>Клуб<select name="club" defaultValue={a.club_id||''}><option value="">Без клуба</option>{clubs.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label><label>Статус<select name="status" defaultValue={a.status}>{['Активен','Травма','Дисквалификация','Завершил карьеру'].map(x=><option key={x}>{x}</option>)}</select></label><label>Игровой номер<input name="number" type="number" min="0" max="99" defaultValue={a.number}/></label><label>Рост, см<input name="height" type="number" min="100" max="250" defaultValue={a.height}/></label><label>Вес, кг<input name="weight" type="number" min="30" max="200" defaultValue={a.weight}/></label></div><div className="modal-actions"><button type="button" className="button-secondary" onClick={()=>setModal(false)}>Отмена</button><button className="button-primary" disabled={busy}>{busy?'Сохранение…':'Сохранить изменения'}</button></div></form></div>}
- </div>
+const TABS = ['Обзор', 'Антропометрия', 'Состав тела', 'Физ. подготовка', 'Травмы', 'Трансферы', 'История'];
+
+// Пока показываем метку «демо» у блоков с тестовыми данными. Поставь false, чтобы убрать.
+const SHOW_DEMO_BADGE = true;
+
+const STATUS_BADGE = {
+  'Активен': 'fc-badge-green',
+  'Травма': 'fc-badge-orange',
+  'Дисквалификация': 'fc-badge-red',
+  'Завершил карьеру': 'fc-badge-blue',
+};
+
+const tooltipStyle = {
+  contentStyle: { background: '#0d1630', border: '1px solid #1c2a4a', borderRadius: 8, color: '#e8eefc', fontSize: 13 },
+  itemStyle: { color: '#e8eefc' },
+  labelStyle: { color: '#7d8bab' },
+};
+
+const formatDate = iso =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+
+/* ---------- Карточки ---------- */
+
+function DemoTag() {
+  return SHOW_DEMO_BADGE ? <span className="fc-demo">демо</span> : null;
 }
-function Info({icon:Icon,label,value}){return <div className="info-item"><span className="info-icon"><Icon size={18}/></span><div><small>{label}</small><b>{value}</b></div></div>}
+
+function AnthropometryCard({ a, m }) {
+  const rows = [
+    ['Рост', `${a.height} см`],
+    ['Вес', `${a.weight} кг`],
+    ['ИМТ', m.bmi],
+    ['Размах рук', `${m.armSpan} см`],
+    ['Длина ноги', `${m.legLength} см`],
+  ];
+  return (
+    <article className="fc-card">
+      <div className="fc-card-head">
+        <h2>Антропометрические данные</h2>
+        <DemoTag />
+      </div>
+      <div className="fc-anthro">
+        <BodySilhouette height={250} />
+        <dl className="fc-anthro-list">
+          {rows.map(([label, value]) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </article>
+  );
+}
+
+function CompositionCard({ m, tall }) {
+  const donut = [
+    { name: 'Жировая масса', value: m.fatPct, color: '#22c58b' },
+    { name: 'Остальное', value: 100 - m.fatPct, color: '#2d7bff' },
+  ];
+  return (
+    <article className="fc-card">
+      <div className="fc-card-head">
+        <h2>Состав тела</h2>
+        <DemoTag />
+      </div>
+
+      <div className="fc-comp">
+        <div className="fc-comp-donut">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={donut} dataKey="value" innerRadius={44} outerRadius={60} startAngle={90} endAngle={-270} stroke="none">
+                {donut.map(d => <Cell key={d.name} fill={d.color} />)}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="fc-comp-center">
+            <b>{m.fatPct}%</b>
+            <span>Жир. масса</span>
+          </div>
+        </div>
+
+        <ul className="fc-comp-list">
+          <li><span>Мышечная масса</span><b>{m.muscleMass} кг</b></li>
+          <li><span>Жировая масса</span><b>{m.fatMass} кг</b></li>
+          <li><span>Вода</span><b>{m.water}%</b></li>
+        </ul>
+      </div>
+
+      <div className={`fc-trend ${tall ? 'tall' : ''}`}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={m.trend} margin={{ top: 6, right: 8, left: -18, bottom: 0 }}>
+            <CartesianGrid vertical={false} stroke="#1c2a4a" strokeDasharray="3 4" />
+            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#7d8bab', fontSize: 11 }} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#7d8bab', fontSize: 11 }} domain={['auto', 'auto']} />
+            <Tooltip {...tooltipStyle} formatter={(v, n) => [`${v} кг`, n]} />
+            <Line type="monotone" dataKey="muscle" name="Мышечная масса" stroke="#2d7bff" strokeWidth={2.2} dot={{ r: 3 }} />
+            <Line type="monotone" dataKey="fat" name="Жировая масса" stroke="#22c58b" strokeWidth={2.2} dot={{ r: 3 }} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="fc-trend-legend">
+        <span><i style={{ background: '#2d7bff' }} /> Мышечная масса</span>
+        <span><i style={{ background: '#22c58b' }} /> Жировая масса</span>
+      </div>
+    </article>
+  );
+}
+
+function DynamicsCard({ m }) {
+  return (
+    <article className="fc-card">
+      <div className="fc-card-head">
+        <h2>Динамика показателей</h2>
+        <DemoTag />
+      </div>
+      <ul className="fc-dyn">
+        {m.indicators.map(row => (
+          <li key={row.label}>
+            <span>{row.label}</span>
+            <b>{row.value}</b>
+            <em>
+              <IconArrowUpRight size={14} /> {row.change}%
+            </em>
+          </li>
+        ))}
+      </ul>
+    </article>
+  );
+}
+
+/* ---------- Страница ---------- */
+
+export default function AthleteProfile() {
+  const { id } = useParams();
+  const notify = useToast();
+  const navigate = useNavigate();
+
+  const [a, setA] = useState(null);
+  const [clubs, setClubs] = useState([]);
+  const [error, setError] = useState(false);
+  const [tab, setTab] = useState('Обзор');
+  const [editing, setEditing] = useState(false);
+
+  const refresh = () => getAthlete(id).then(setA).catch(() => setError(true));
+
+  useEffect(() => {
+    refresh();
+    getClubs().then(r => setClubs(Array.isArray(r) ? r : r.results || [])).catch(() => {});
+  }, [id]);
+
+  const metrics = useMemo(() => (a ? buildMetrics(a) : null), [a]);
+
+  const remove = async () => {
+    if (!window.confirm(`Удалить карточку ${a.full_name}?`)) return;
+    try {
+      await deleteAthlete(a.id);
+      notify('Карточка спортсмена удалена.');
+      navigate('/athletes');
+    } catch {
+      notify('Не удалось удалить запись.', 'error');
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="fc-card fc-prof-msg">
+        <h2>Спортсмен не найден</h2>
+        <Link className="fc-more" to="/athletes">Вернуться к базе</Link>
+      </div>
+    );
+  }
+  if (!a) return <div className="fc-prof-msg">Загружаем карточку спортсмена…</div>;
+
+  const stats = [
+    ['Возраст', `${a.age} лет`, new Date(`${a.birth_date}T00:00:00`).toLocaleDateString('ru-RU')],
+    ['Рост', `${a.height} см`, null],
+    ['Вес', `${a.weight} кг`, null],
+    ['Позиция', a.position, `№ ${a.number}`],
+  ];
+
+  return (
+    <div>
+      <Link to="/athletes" className="fc-back">
+        <IconArrowLeft size={17} /> Назад
+      </Link>
+
+      {/* Шапка профиля */}
+      <section className="fc-card fc-prof-head">
+        <div className="fc-prof-person">
+          <Avatar athlete={a} size={84} />
+          <div>
+            <h1>{a.name}</h1>
+            <div className="fc-prof-chips">
+              <span className="fc-chip">ID: {a.id}</span>
+              <span className="fc-chip">
+                <i style={{ background: a.club_color }} /> {a.club_name}
+              </span>
+              <span className="fc-chip">{a.sport}</span>
+              <span className={`fc-badge ${STATUS_BADGE[a.status] || 'fc-badge-blue'}`}>{a.status}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="fc-prof-stats">
+          {stats.map(([label, value, sub]) => (
+            <div key={label}>
+              <span>{label}</span>
+              <b>{value}</b>
+              {sub && <small>{sub}</small>}
+            </div>
+          ))}
+        </div>
+
+        <div className="fc-prof-actions">
+          <button className="fc-btn fc-btn-ghost" onClick={() => setEditing(true)}>
+            <IconPencil size={16} /> Редактировать
+          </button>
+          <button className="fc-btn fc-btn-ghost danger" onClick={remove} aria-label="Удалить">
+            <IconTrash size={16} />
+          </button>
+        </div>
+      </section>
+
+      {/* Вкладки */}
+      <div className="fc-tabs fc-prof-tabs">
+        {TABS.map(t => (
+          <button key={t} className={`fc-tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'Обзор' && (
+        <div className="fc-overview">
+          <AnthropometryCard a={a} m={metrics} />
+          <CompositionCard m={metrics} />
+          <DynamicsCard m={metrics} />
+        </div>
+      )}
+
+      {tab === 'Антропометрия' && (
+        <div className="fc-two">
+          <AnthropometryCard a={a} m={metrics} />
+        </div>
+      )}
+
+      {tab === 'Состав тела' && <CompositionCard m={metrics} tall />}
+
+      {tab === 'Физ. подготовка' && (
+        <div className="fc-two">
+          <DynamicsCard m={metrics} />
+        </div>
+      )}
+
+      {tab === 'Травмы' && (
+        <section className="fc-card">
+          <div className="fc-card-head">
+            <h2>Медицинская карта</h2>
+            <span className={`fc-badge ${a.status === 'Травма' ? 'fc-badge-orange' : 'fc-badge-green'}`}>
+              {a.status === 'Травма' ? 'Требует внимания' : 'Допущен к соревнованиям'}
+            </span>
+          </div>
+          <p className="fc-text">{a.medical || a.medical_notes || 'Медицинские данные не заполнены.'}</p>
+        </section>
+      )}
+
+      {tab === 'Трансферы' && (
+        <section className="fc-card">
+          <div className="fc-card-head">
+            <h2>История трансферов</h2>
+            <Link className="fc-more" to="/transfers">Все трансферы</Link>
+          </div>
+          {a.transfers?.length ? (
+            <div className="fc-table-wrap">
+              <table className="fc-table">
+                <thead>
+                  <tr><th>Дата</th><th>Откуда</th><th>Куда</th><th>Тип</th></tr>
+                </thead>
+                <tbody>
+                  {a.transfers.map((t, i) => (
+                    <tr key={t.id || i}>
+                      <td className="muted">{formatDate(t.date)}</td>
+                      <td>{t.from || 'Свободный агент'}</td>
+                      <td>{t.to || 'Клуб не указан'}</td>
+                      <td>{t.type || t.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="fc-text">История переходов ещё не добавлена.</p>
+          )}
+        </section>
+      )}
+
+      {tab === 'История' && (
+        <section className="fc-card">
+          <div className="fc-card-head">
+            <h2>Достижения и награды</h2>
+          </div>
+          <ul className="fc-awards">
+            {(a.achievements || []).map((x, i) => (
+              <li key={i}>
+                <IconTrophy size={19} />
+                <b>{x}</b>
+              </li>
+            ))}
+          </ul>
+          {!a.achievements?.length && <p className="fc-text">Достижения пока не добавлены.</p>}
+        </section>
+      )}
+
+      {editing && (
+        <EditAthleteModal
+          athlete={a}
+          clubs={clubs}
+          onClose={() => setEditing(false)}
+          onSaved={() => { setEditing(false); refresh(); }}
+        />
+      )}
+    </div>
+  );
+}

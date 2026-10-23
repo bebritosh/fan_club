@@ -1,16 +1,308 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { IconAdjustmentsHorizontal, IconArrowDown, IconChevronLeft, IconChevronRight, IconDownload, IconPlus, IconSearch, IconTrash, IconX } from '@tabler/icons-react';
-import { deleteAthlete, getAthletes, getClubs, saveAthlete } from '../services/api';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { IconChevronLeft, IconChevronRight, IconDownload, IconPlus } from '@tabler/icons-react';
+import { getAthletes, getClubs } from '../services/api';
 import { useToast } from '../context/ToastContext.jsx';
-import './AthletesList.css';
-const initials=n=>n?.split(' ').slice(0,2).map(x=>x[0]).join('');
-export default function AthletesList(){
- const notify=useToast();const [searchParams]=useSearchParams();const [rows,setRows]=useState([]),[clubs,setClubs]=useState([]),[query,setQuery]=useState(''),[sport,setSport]=useState('Все виды спорта'),[state,setState]=useState(searchParams.get('status')||'Все статусы'),[page,setPage]=useState(1),[modal,setModal]=useState(false),[busy,setBusy]=useState(false);
- const refresh=()=>getAthletes().then(r=>setRows(Array.isArray(r)?r:r.results||[]));useEffect(()=>{refresh().catch(()=>notify('Не удалось загрузить спортсменов.','error'));getClubs().then(r=>setClubs(Array.isArray(r)?r:r.results||[])).catch(()=>{})},[]);
- const filtered=useMemo(()=>rows.filter(a=>(!query||a.full_name.toLowerCase().includes(query.toLowerCase())||a.club.toLowerCase().includes(query.toLowerCase()))&&(sport==='Все виды спорта'||a.sport===sport)&&(state==='Все статусы'||a.status===state)),[rows,query,sport,state]);const pageSize=10,visible=filtered.slice((page-1)*pageSize,page*pageSize),pages=Math.max(1,Math.ceil(filtered.length/pageSize));
- const remove=async a=>{if(!window.confirm(`Удалить карточку ${a.full_name}?`))return;try{await deleteAthlete(a.id);await refresh();notify('Карточка спортсмена удалена.')}catch{notify('Не удалось удалить запись.','error')}};
- const exportRows=()=>{const data=[['ID','ФИО','Возраст','Спорт','Клуб','Статус'],...filtered.map(a=>[a.id,a.full_name,a.age,a.sport,a.club,a.status])];const csv='\ufeff'+data.map(row=>row.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(';')).join('\n');const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='athletes.csv';link.click();URL.revokeObjectURL(link.href);notify('CSV-файл сформирован.');};
- const create=async e=>{e.preventDefault();setBusy(true);const d=Object.fromEntries(new FormData(e.currentTarget));const parts=d.full_name.trim().split(/\s+/);try{await saveAthlete({first_name:parts[0],last_name:parts.slice(1,2).join(' ')||'Спортсмен',middle_name:parts.slice(2).join(' '),gender:d.gender,birth_date:d.birth_date,sport:d.sport,position:d.position,club:d.club?Number(d.club):null,number:Number(d.number||0),status:'Активен',height:Number(d.height||180),weight:Number(d.weight||75),achievements:[],medical_notes:''});setModal(false);await refresh();notify('Спортсмен добавлен в базу.')}catch(err){notify(Object.values(err.response?.data||{}).flat().join(' ')||'Не удалось сохранить карточку.','error')}finally{setBusy(false)}};
- return <div className="athletes-page"><div className="page-heading list-heading"><div><div className="eyebrow">СПРАВОЧНИК · {rows.length} ЗАПИСЕЙ</div><h1>База спортсменов</h1><p>Единый реестр спортсменов федерации и клубов.</p></div><div className="heading-actions"><button className="button-secondary" onClick={exportRows}><IconDownload size={19}/> Экспорт CSV</button><button className="button-primary" onClick={()=>setModal(true)}><IconPlus size={19}/> Добавить спортсмена</button></div></div><section className="table-panel"><div className="table-toolbar"><div className="table-search"><IconSearch size={19}/><input value={query} onChange={e=>{setQuery(e.target.value);setPage(1)}} placeholder="Поиск по имени или клубу..."/>{query&&<button onClick={()=>setQuery('')}><IconX size={17}/></button>}</div><div className="table-filters"><label><IconAdjustmentsHorizontal size={18}/><span>Фильтры</span></label><select value={sport} onChange={e=>{setSport(e.target.value);setPage(1)}}><option>Все виды спорта</option>{['Футбол','Баскетбол','Хоккей','Волейбол'].map(s=><option key={s}>{s}</option>)}</select><select value={state} onChange={e=>{setState(e.target.value);setPage(1)}}><option>Все статусы</option>{['Активен','Травма','Дисквалификация','Завершил карьеру'].map(s=><option key={s}>{s}</option>)}</select></div></div><div className="table-scroll"><table className="athletes-table"><thead><tr><th>ID <IconArrowDown size={14}/></th><th>СПОРТСМЕН</th><th>ВОЗРАСТ</th><th>ВИД СПОРТА</th><th>ТЕКУЩИЙ КЛУБ</th><th>№</th><th>СТАТУС</th><th/></tr></thead><tbody>{visible.map(a=><tr key={a.id}><td className="id-cell">#{a.id}</td><td><Link to={`/athletes/${a.id}`} className="athlete-cell"><span className={`athlete-avatar avatar-${a.gender==='Ж'?'f':'m'}`}>{initials(a.name)}</span><span><b>{a.full_name}</b><small>{a.position}</small></span></Link></td><td>{a.age} лет</td><td><span className="sport-tag">{a.sport}</span></td><td><span className="club-cell"><i style={{background:a.club_color||'#315fd2'}}/>{a.club}</span></td><td>{a.number}</td><td><span className={`status-pill ${a.status==='Активен'?'status-active':a.status==='Травма'?'status-injured':a.status==='Дисквалификация'?'status-suspended':'status-retired'}`}><i/>{a.status}</span></td><td className="row-actions"><Link className="row-arrow" to={`/athletes/${a.id}`}><IconChevronRight size={18}/></Link><button className="row-delete" title="Удалить" onClick={()=>remove(a)}><IconTrash size={17}/></button></td></tr>)}</tbody></table>{visible.length===0&&<div className="empty-state">По вашему запросу спортсмены не найдены.</div>}</div><div className="table-footer"><span>Показано <b>{filtered.length?((page-1)*pageSize+1):0}–{Math.min(page*pageSize,filtered.length)}</b> из <b>{filtered.length}</b> спортсменов</span><div className="pagination"><button onClick={()=>setPage(Math.max(1,page-1))} disabled={page===1}><IconChevronLeft size={18}/></button>{Array.from({length:pages},(_,i)=><button key={i} onClick={()=>setPage(i+1)} className={page===i+1?'current':''}>{i+1}</button>).slice(0,6)}<button onClick={()=>setPage(Math.min(pages,page+1))} disabled={page>=pages}><IconChevronRight size={18}/></button></div></div></section>{modal&&<div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&setModal(false)}><form className="edit-modal" onSubmit={create}><button type="button" className="modal-close" onClick={()=>setModal(false)}><IconX/></button><div className="eyebrow">НОВАЯ ЗАПИСЬ</div><h2>Добавить спортсмена</h2><div className="form-grid"><label>ФИО<input name="full_name" required placeholder="Имя Фамилия Отчество"/></label><label>Дата рождения<input name="birth_date" type="date" required/></label><label>Вид спорта<select name="sport">{['Футбол','Баскетбол','Хоккей','Волейбол'].map(x=><option key={x}>{x}</option>)}</select></label><label>Позиция<input name="position" required placeholder="Нападающий"/></label><label>Клуб<select name="club"><option value="">Без клуба</option>{clubs.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label><label>Номер<input name="number" type="number" min="0" max="99" defaultValue="0"/></label><label>Рост, см<input name="height" type="number" defaultValue="180"/></label><label>Вес, кг<input name="weight" type="number" defaultValue="75"/></label><label>Пол<select name="gender"><option value="М">Мужской</option><option value="Ж">Женский</option></select></label></div><div className="modal-actions"><button type="button" className="button-secondary" onClick={()=>setModal(false)}>Отмена</button><button disabled={busy} className="button-primary">{busy?'Сохранение…':'Добавить в базу'}</button></div></form></div>}</div>
+import Avatar from '../components/Avatar.jsx';
+import AddAthleteModal from '../components/AddAthleteModal.jsx';
+import './AthletesList.css'; // старые стили, их ещё использует профиль спортсмена и трансферы
+import './AthletesPage.css';
+
+const EMPTY_FILTERS = {
+  name: '',
+  id: '',
+  ageMin: '',
+  ageMax: '',
+  gender: 'Все',
+  sport: '',
+  position: '',
+  heightMin: '',
+  heightMax: '',
+  weightMin: '',
+  weightMax: '',
+};
+
+const SORTS = {
+  new: { label: 'По дате добавления', fn: (a, b) => new Date(b.created_at) - new Date(a.created_at) },
+  name: { label: 'По имени', fn: (a, b) => a.name.localeCompare(b.name, 'ru') },
+  age: { label: 'По возрасту', fn: (a, b) => a.age - b.age },
+  height: { label: 'По росту', fn: (a, b) => b.height - a.height },
+};
+
+const toList = r => (Array.isArray(r) ? r : r?.results || []);
+
+// Для диапазона «от — до»: пустое поле значит «без ограничения»
+const inRange = (value, min, max) =>
+  (min === '' || value >= Number(min)) && (max === '' || value <= Number(max));
+
+// Список номеров страниц: 1 … 4 5 6 … 12
+function pageList(page, pages) {
+  if (pages <= 7) return Array.from({ length: pages }, (_, i) => i + 1);
+  const list = new Set([1, pages, page - 1, page, page + 1]);
+  const sorted = [...list].filter(p => p >= 1 && p <= pages).sort((a, b) => a - b);
+  const result = [];
+  sorted.forEach((p, i) => {
+    if (i > 0 && p - sorted[i - 1] > 1) result.push('…');
+    result.push(p);
+  });
+  return result;
+}
+
+export default function AthletesList() {
+  const notify = useToast();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const [rows, setRows] = useState([]);
+  const [clubs, setClubs] = useState([]);
+  const [filters, setFilters] = useState({ ...EMPTY_FILTERS, name: searchParams.get('q') || '' });
+  const [sort, setSort] = useState('new');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [modal, setModal] = useState(false);
+
+  const refresh = () => getAthletes().then(r => setRows(toList(r)));
+
+  useEffect(() => {
+    refresh().catch(() => notify('Не удалось загрузить спортсменов.', 'error'));
+    getClubs().then(r => setClubs(toList(r))).catch(() => {});
+  }, []);
+
+  // Поиск из верхней панели (?q=...) подставляется в фильтр «Имя»
+  const urlQuery = searchParams.get('q') || '';
+  useEffect(() => {
+    setFilters(prev => ({ ...prev, name: urlQuery }));
+    setPage(1);
+  }, [urlQuery]);
+
+  const setFilter = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPage(1);
+  };
+
+  const sports = useMemo(() => [...new Set(rows.map(a => a.sport))].sort(), [rows]);
+  const positions = useMemo(() => [...new Set(rows.map(a => a.position))].sort(), [rows]);
+
+  const filtered = useMemo(() => {
+    const f = filters;
+    const name = f.name.trim().toLowerCase();
+    return rows
+      .filter(a => !name || a.full_name.toLowerCase().includes(name))
+      .filter(a => !f.id.trim() || String(a.id).startsWith(f.id.trim()))
+      .filter(a => inRange(a.age, f.ageMin, f.ageMax))
+      .filter(a => f.gender === 'Все' || a.gender === f.gender)
+      .filter(a => !f.sport || a.sport === f.sport)
+      .filter(a => !f.position || a.position === f.position)
+      .filter(a => inRange(a.height, f.heightMin, f.heightMax))
+      .filter(a => inRange(a.weight, f.weightMin, f.weightMax))
+      .sort(SORTS[sort].fn);
+  }, [rows, filters, sort]);
+
+  const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const current = Math.min(page, pages);
+  const start = (current - 1) * pageSize;
+  const visible = filtered.slice(start, start + pageSize);
+
+  const exportCsv = () => {
+    const header = ['ID', 'ФИО', 'Возраст', 'Рост', 'Вес', 'Клуб', 'Вид спорта', 'Статус'];
+    const body = filtered.map(a => [a.id, a.full_name, a.age, a.height, a.weight, a.club_name, a.sport, a.status]);
+    const csv =
+      '\ufeff' +
+      [header, ...body]
+        .map(row => row.map(v => `"${String(v ?? '').replaceAll('"', '""')}"`).join(';'))
+        .join('\n');
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    link.download = 'athletes.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+    notify('CSV-файл сформирован.');
+  };
+
+  return (
+    <div>
+      <div className="fc-page-head">
+        <div>
+          <h1>База спортсменов</h1>
+          <p>Найдено: {filtered.length} из {rows.length}</p>
+        </div>
+        <div className="fc-page-actions">
+          <label className="fc-sort">
+            <span>Сортировать:</span>
+            <select className="fc-select" value={sort} onChange={e => setSort(e.target.value)}>
+              {Object.entries(SORTS).map(([key, s]) => (
+                <option key={key} value={key}>{s.label}</option>
+              ))}
+            </select>
+          </label>
+          <button className="fc-btn fc-btn-ghost" onClick={exportCsv}>
+            <IconDownload size={17} /> Экспорт CSV
+          </button>
+          <button className="fc-btn fc-btn-primary" onClick={() => setModal(true)}>
+            <IconPlus size={17} /> Добавить спортсмена
+          </button>
+        </div>
+      </div>
+
+      <div className="fc-ath-layout">
+        {/* ---------- Панель фильтров ---------- */}
+        <aside className="fc-card fc-filters">
+          <div className="fc-filters-head">
+            <h2>Фильтры</h2>
+            <button className="fc-reset" onClick={() => { setFilters(EMPTY_FILTERS); setPage(1); }}>
+              Сбросить
+            </button>
+          </div>
+
+          <label className="fc-field">
+            <span>Имя / Фамилия</span>
+            <input className="fc-input" placeholder="Иванов / Алексей" value={filters.name} onChange={e => setFilter('name', e.target.value)} />
+          </label>
+
+          <label className="fc-field">
+            <span>ID спортсмена</span>
+            <input className="fc-input" placeholder="Например, 12" value={filters.id} onChange={e => setFilter('id', e.target.value)} />
+          </label>
+
+          <div className="fc-field">
+            <span>Возраст</span>
+            <div className="fc-range">
+              <input className="fc-input" type="number" min="0" placeholder="от" value={filters.ageMin} onChange={e => setFilter('ageMin', e.target.value)} />
+              <i>—</i>
+              <input className="fc-input" type="number" min="0" placeholder="до" value={filters.ageMax} onChange={e => setFilter('ageMax', e.target.value)} />
+            </div>
+          </div>
+
+          <div className="fc-field">
+            <span>Пол</span>
+            <div className="fc-seg">
+              {[['Все', 'Все'], ['М', 'Мужской'], ['Ж', 'Женский']].map(([value, label]) => (
+                <button key={value} className={filters.gender === value ? 'active' : ''} onClick={() => setFilter('gender', value)}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <label className="fc-field">
+            <span>Вид спорта</span>
+            <select className="fc-select" value={filters.sport} onChange={e => setFilter('sport', e.target.value)}>
+              <option value="">Все виды спорта</option>
+              {sports.map(s => <option key={s}>{s}</option>)}
+            </select>
+          </label>
+
+          <label className="fc-field">
+            <span>Позиция</span>
+            <select className="fc-select" value={filters.position} onChange={e => setFilter('position', e.target.value)}>
+              <option value="">Все позиции</option>
+              {positions.map(p => <option key={p}>{p}</option>)}
+            </select>
+          </label>
+
+          <div className="fc-filters-sub">Физические параметры</div>
+
+          <div className="fc-field">
+            <span>Рост (см)</span>
+            <div className="fc-range">
+              <input className="fc-input" type="number" placeholder="от" value={filters.heightMin} onChange={e => setFilter('heightMin', e.target.value)} />
+              <i>—</i>
+              <input className="fc-input" type="number" placeholder="до" value={filters.heightMax} onChange={e => setFilter('heightMax', e.target.value)} />
+            </div>
+          </div>
+
+          <div className="fc-field">
+            <span>Вес (кг)</span>
+            <div className="fc-range">
+              <input className="fc-input" type="number" placeholder="от" value={filters.weightMin} onChange={e => setFilter('weightMin', e.target.value)} />
+              <i>—</i>
+              <input className="fc-input" type="number" placeholder="до" value={filters.weightMax} onChange={e => setFilter('weightMax', e.target.value)} />
+            </div>
+          </div>
+        </aside>
+
+        {/* ---------- Таблица ---------- */}
+        <section className="fc-card fc-ath-table">
+          <div className="fc-table-wrap">
+            <table className="fc-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Имя</th>
+                  <th>Возраст</th>
+                  <th>Рост</th>
+                  <th>Вес</th>
+                  <th>Клуб</th>
+                  <th>Вид спорта</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map(a => (
+                  <tr key={a.id} className="clickable" onClick={() => navigate(`/athletes/${a.id}`)}>
+                    <td className="muted">{a.id}</td>
+                    <td>
+                      <span className="fc-name-cell">
+                        <Avatar athlete={a} size={36} />
+                        <b>{a.name}</b>
+                      </span>
+                    </td>
+                    <td>{a.age}</td>
+                    <td>{a.height}</td>
+                    <td>{a.weight}</td>
+                    <td>
+                      <span className="fc-club-cell">
+                        <i style={{ background: a.club_color }} />
+                        {a.club_name}
+                      </span>
+                    </td>
+                    <td>{a.sport}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {visible.length === 0 && <p className="fc-empty-big">По вашему запросу спортсмены не найдены.</p>}
+          </div>
+
+          <div className="fc-ath-foot">
+            <span className="fc-foot-count">
+              {filtered.length ? `${start + 1}–${Math.min(start + pageSize, filtered.length)}` : 0} из {filtered.length}
+            </span>
+
+            <div className="fc-pager">
+              <button onClick={() => setPage(current - 1)} disabled={current === 1} aria-label="Назад">
+                <IconChevronLeft size={16} />
+              </button>
+              {pageList(current, pages).map((p, i) =>
+                p === '…' ? (
+                  <span key={`gap${i}`}>…</span>
+                ) : (
+                  <button key={p} className={p === current ? 'current' : ''} onClick={() => setPage(p)}>
+                    {p}
+                  </button>
+                ),
+              )}
+              <button onClick={() => setPage(current + 1)} disabled={current >= pages} aria-label="Вперёд">
+                <IconChevronRight size={16} />
+              </button>
+            </div>
+
+            <label className="fc-sort">
+              <span>Показывать:</span>
+              <select className="fc-select" value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}>
+                {[10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </label>
+          </div>
+        </section>
+      </div>
+
+      {modal && (
+        <AddAthleteModal
+          clubs={clubs}
+          onClose={() => setModal(false)}
+          onSaved={() => { setModal(false); refresh(); }}
+        />
+      )}
+    </div>
+  );
 }
