@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { IconChevronLeft, IconChevronRight, IconDownload, IconPlus } from '@tabler/icons-react';
-import { getAthletes, getClubs } from '../services/api';
+import { Pencil, Trash2, LoaderCircle } from 'lucide-react';
+import { deleteAthlete, getAthletes, getClubs, saveAthlete } from '../services/api';
 import { useToast } from '../context/ToastContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 import Avatar from '../components/Avatar.jsx';
 import AddAthleteModal from '../components/AddAthleteModal.jsx';
 import './AthletesList.css'; // старые стили, их ещё использует профиль спортсмена и трансферы
@@ -49,6 +51,7 @@ function pageList(page, pages) {
 }
 
 export default function AthletesList() {
+  const { user } = useAuth();
   const notify = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -60,6 +63,9 @@ export default function AthletesList() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [modal, setModal] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [deleting, setDeleting] = useState(null);
+  const [actionBusy, setActionBusy] = useState(false);
 
   const refresh = () => getAthletes().then(r => setRows(toList(r)));
 
@@ -119,6 +125,25 @@ export default function AthletesList() {
     notify('CSV-файл сформирован.');
   };
 
+  const saveEditedAthlete = async event => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setActionBusy(true);
+    try {
+      await saveAthlete({ first_name: form.get('first_name'), last_name: form.get('last_name'), sport: form.get('sport') }, editing.id);
+      await refresh(); setEditing(null); notify('Данные спортсмена обновлены.');
+    } catch { notify('Не удалось обновить данные спортсмена.', 'error'); }
+    finally { setActionBusy(false); }
+  };
+
+  const removeAthlete = async () => {
+    if (!deleting) return;
+    setActionBusy(true);
+    try { await deleteAthlete(deleting.id); await refresh(); setDeleting(null); notify('Спортсмен удалён из базы.'); }
+    catch { notify('Не удалось удалить спортсмена.', 'error'); }
+    finally { setActionBusy(false); }
+  };
+
   return (
     <div>
       <div className="fc-page-head">
@@ -138,9 +163,9 @@ export default function AthletesList() {
           <button className="fc-btn fc-btn-ghost" onClick={exportCsv}>
             <IconDownload size={17} /> Экспорт CSV
           </button>
-          <button className="fc-btn fc-btn-primary" onClick={() => setModal(true)}>
+          {user?.is_staff && <button className="fc-btn fc-btn-primary" onClick={() => setModal(true)}>
             <IconPlus size={17} /> Добавить спортсмена
-          </button>
+          </button>}
         </div>
       </div>
 
@@ -234,6 +259,7 @@ export default function AthletesList() {
                   <th>Вес</th>
                   <th>Клуб</th>
                   <th>Вид спорта</th>
+                  {user?.is_staff && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -256,6 +282,7 @@ export default function AthletesList() {
                       </span>
                     </td>
                     <td>{a.sport}</td>
+                    {user?.is_staff && <td className="fc-row-actions" onClick={event => event.stopPropagation()}><button type="button" aria-label="Редактировать" title="Редактировать" onClick={() => setEditing(a)}><Pencil size={17}/></button><button type="button" className="danger" aria-label="Удалить" title="Удалить" onClick={() => setDeleting(a)}><Trash2 size={17}/></button></td>}
                   </tr>
                 ))}
               </tbody>
@@ -303,6 +330,8 @@ export default function AthletesList() {
           onSaved={() => { setModal(false); refresh(); }}
         />
       )}
+      {editing && <div className="fc-confirm-backdrop" onMouseDown={e => e.target === e.currentTarget && setEditing(null)}><form className="fc-confirm-dialog" onSubmit={saveEditedAthlete}><h2>Редактировать спортсмена</h2><label>Имя<input name="first_name" defaultValue={editing.first_name || editing.name?.split(' ')[0]} required/></label><label>Фамилия<input name="last_name" defaultValue={editing.last_name || editing.name?.split(' ').slice(1).join(' ')} required/></label><label>Вид спорта<input name="sport" defaultValue={editing.sport} required/></label><div className="fc-confirm-actions"><button type="button" className="fc-btn fc-btn-ghost" onClick={() => setEditing(null)}>Отмена</button><button className="fc-btn fc-btn-primary" disabled={actionBusy}>{actionBusy && <LoaderCircle className="fc-spin" size={16}/>}Сохранить</button></div></form></div>}
+      {deleting && <div className="fc-confirm-backdrop" onMouseDown={e => e.target === e.currentTarget && setDeleting(null)}><section className="fc-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title"><h2 id="delete-title">Удалить спортсмена?</h2><p>Вы уверены, что хотите удалить запись «{deleting.name}»? Это действие нельзя отменить.</p><div className="fc-confirm-actions"><button className="fc-btn fc-btn-ghost" onClick={() => setDeleting(null)} disabled={actionBusy}>Отмена</button><button className="fc-btn fc-btn-danger" onClick={removeAthlete} disabled={actionBusy}>{actionBusy && <LoaderCircle className="fc-spin" size={16}/>}Удалить</button></div></section></div>}
     </div>
   );
 }

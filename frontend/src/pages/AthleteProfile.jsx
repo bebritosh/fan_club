@@ -5,6 +5,7 @@ import { CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContaine
 import { deleteAthlete, getAthlete, getClubs } from '../services/api';
 import { buildMetrics } from '../services/mockData';
 import { useToast } from '../context/ToastContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 import Avatar from '../components/Avatar.jsx';
 import BodySilhouette from '../components/BodySilhouette.jsx';
 import EditAthleteModal from '../components/EditAthleteModal.jsx';
@@ -146,6 +147,7 @@ function DynamicsCard({ m }) {
 /* ---------- Страница ---------- */
 
 export default function AthleteProfile() {
+  const { user } = useAuth();
   const { id } = useParams();
   const notify = useToast();
   const navigate = useNavigate();
@@ -226,14 +228,14 @@ export default function AthleteProfile() {
           ))}
         </div>
 
-        <div className="fc-prof-actions">
+        {user?.is_staff && <div className="fc-prof-actions">
           <button className="fc-btn fc-btn-ghost" onClick={() => setEditing(true)}>
             <IconPencil size={16} /> Редактировать
           </button>
           <button className="fc-btn fc-btn-ghost danger" onClick={remove} aria-label="Удалить">
             <IconTrash size={16} />
           </button>
-        </div>
+        </div>}
       </section>
 
       {/* Вкладки */}
@@ -326,7 +328,7 @@ export default function AthleteProfile() {
         </section>
       )}
 
-      {editing && (
+      {user?.is_staff && editing && (
         <EditAthleteModal
           athlete={a}
           clubs={clubs}

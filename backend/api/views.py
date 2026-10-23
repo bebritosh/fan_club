@@ -3,11 +3,15 @@ from django.db.models import Count
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS, BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Athlete, Club, Event, Transfer
 from .serializers import AthleteSerializer, ClubSerializer, EventSerializer, RegisterSerializer, TransferSerializer, UserSerializer
+
+class IsStaffOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        return request.method in SAFE_METHODS or bool(request.user and request.user.is_staff)
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -35,6 +39,7 @@ class PasswordChangeView(APIView):
         return Response({"detail": "Пароль успешно обновлён."})
 
 class AthleteViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsStaffOrReadOnly]
     serializer_class = AthleteSerializer
     queryset = Athlete.objects.select_related("club").prefetch_related("transfers__from_club", "transfers__to_club")
     def get_queryset(self):
@@ -46,9 +51,11 @@ class AthleteViewSet(viewsets.ModelViewSet):
         return qs.distinct()
 
 class ClubViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsStaffOrReadOnly]
     serializer_class = ClubSerializer
     queryset = Club.objects.annotate(athlete_count=Count("athletes"))
 class TransferViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsStaffOrReadOnly]
     serializer_class = TransferSerializer
     queryset = Transfer.objects.select_related("athlete", "from_club", "to_club")
     def perform_update(self, serializer):
@@ -56,6 +63,7 @@ class TransferViewSet(viewsets.ModelViewSet):
         if transfer.status == "Одобрен" and transfer.to_club_id:
             Athlete.objects.filter(pk=transfer.athlete_id).update(club_id=transfer.to_club_id)
 class EventViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsStaffOrReadOnly]
     serializer_class = EventSerializer
     queryset = Event.objects.prefetch_related("clubs")
 

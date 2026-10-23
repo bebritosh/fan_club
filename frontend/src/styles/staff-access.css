@@ -1,0 +1,6 @@
+.fc-shell.is-member .fc-page-actions .fc-btn-primary,
+.fc-shell.is-member .fc-prof-actions,
+.fc-shell.is-member .club-card .quiet-delete,
+.fc-shell.is-member .entity-page:has(.club-grid) > .page-heading > .button-primary,
+.fc-shell.is-member .entity-page:has(.event-list) > .page-heading > .button-primary,
+.fc-shell.is-member .event-delete { display: none !important; }

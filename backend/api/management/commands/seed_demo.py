@@ -26,5 +26,6 @@ class Command(BaseCommand):
         for i,athlete in enumerate(athletes[:12]):
             Transfer.objects.update_or_create(athlete=athlete,defaults={"date":today-timedelta(days=20+i*9),"from_club":clubs[(i+2)%5],"to_club":athlete.club,"amount":Decimal(12500000+i*250000),"status":"Одобрен" if i%2==0 else "В процессе","note":"Демо переход"})
         User=get_user_model()
-        if not User.objects.filter(username="manager").exists(): User.objects.create_user(username="manager",email="manager@fanclub.local",password="FanClub2026!",first_name="Алия",last_name="Мухамедова",title="Менеджер системы")
+        if not User.objects.filter(username="manager").exists(): User.objects.create_user(username="manager",email="manager@fanclub.local",password="FanClub2026!",first_name="Алия",last_name="Мухамедова",title="Менеджер системы",is_staff=True)
+        else: User.objects.filter(username="manager").update(is_staff=True)
         self.stdout.write(self.style.SUCCESS(f"Готово: {len(clubs)} клубов, {len(athletes)} спортсменов, {Event.objects.count()} событий. Демо вход: manager / FanClub2026!"))

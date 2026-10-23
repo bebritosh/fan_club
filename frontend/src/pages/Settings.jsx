@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { IconBell, IconCheck, IconLock, IconPhoto, IconShieldCheck, IconUser } from '@tabler/icons-react';
+import { IconBell, IconCamera, IconLock, IconPhoto, IconUser } from '@tabler/icons-react';
 import { changePassword, updateProfile } from '../services/api';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
@@ -34,7 +34,7 @@ export default function Settings() {
   return <div className="entity-page settings-page">
     <div className="page-heading"><div><div className="eyebrow">РАБОЧЕЕ ПРОСТРАНСТВО · ПЕРСОНАЛЬНЫЕ ДАННЫЕ</div><h1>Настройки</h1><p>Управляйте профилем и параметрами учётной записи.</p></div></div>
     <div className="settings-layout">
-      <nav className="settings-nav"><a href="#profile"><IconUser/>Профиль</a><a href="#password"><IconLock/>Безопасность</a><a href="#notifications"><IconBell/>Уведомления</a><a href="#access"><IconShieldCheck/>Доступ</a></nav>
+      <nav className="settings-nav"><a href="#profile"><IconUser/>Профиль</a><a href="#password"><IconLock/>Безопасность</a><a href="#notifications"><IconBell/>Уведомления</a></nav>
       <div className="settings-content">
         <section className="panel settings-section" id="profile"><div className="settings-title"><i><IconUser/></i><div><h2>Личные данные</h2><p>Информация вашего профиля менеджера.</p></div></div>
           <form onSubmit={saveProfile} className="settings-form"><div className="avatar-upload"><div className="settings-avatar">{preview ? <img src={preview} alt="Аватар профиля"/> : <span>{user?.first_name?.[0] || user?.username?.[0] || 'М'}</span>}</div><div><label className="upload-button"><IconPhoto/>Загрузить фото<input name="avatar" type="file" accept="image/png,image/jpeg,image/webp" onChange={selectAvatar}/></label><small>JPG, PNG или WebP. Не более 3 МБ.</small></div></div>
@@ -47,7 +47,6 @@ export default function Settings() {
         <section className="panel settings-section" id="notifications"><div className="settings-title"><i><IconBell/></i><div><h2>Уведомления</h2><p>Настройки сохраняются для этого браузера.</p></div></div>
           <div className="preference-list">{[['events','Мероприятия','Напоминания о предстоящих матчах и турнирах.'],['transfers','Трансферы','Изменения статусов переходов спортсменов.'],['medical','Медицинские статусы','Обновления по травмам и допускам.']].map(([key,title,desc])=><label className="preference-row" key={key}><span><b>{title}</b><small>{desc}</small></span><input type="checkbox" checked={Boolean(prefs[key])} onChange={()=>toggle(key)}/></label>)}</div>
         </section>
-        <section className="panel settings-section" id="access"><div className="settings-title"><i><IconShieldCheck/></i><div><h2>Права доступа</h2><p>Уровень доступа в системе федерации.</p></div></div><div className="access-card"><span className="access-badge"><IconShieldCheck/>Менеджер</span><div><b>Полный доступ к рабочему пространству</b><small>Управление спортсменами, клубами, событиями и аналитикой.</small></div><IconCheck className="access-check"/></div></section>
       </div>
     </div>
   </div>;

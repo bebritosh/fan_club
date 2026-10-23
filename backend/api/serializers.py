@@ -13,8 +13,8 @@ class UserSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ("id", "username", "first_name", "last_name", "email", "title", "avatar", "avatar_url")
-        read_only_fields = ("id", "username", "avatar_url")
+        fields = ("id", "username", "first_name", "last_name", "email", "title", "avatar", "avatar_url", "is_staff")
+        read_only_fields = ("id", "username", "avatar_url", "is_staff")
         extra_kwargs = {"avatar": {"write_only": True, "required": False}}
     def get_avatar_url(self, obj):
         request = self.context.get("request")
