@@ -1,0 +1,5 @@
+target-version = "py314"
+extend-exclude = ["api/models.py", "api/migrations"]
+
+[lint]
+ignore = ["RUF012"]
