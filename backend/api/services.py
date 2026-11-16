@@ -18,7 +18,7 @@ def _clean_status(value):
 def decide_transfer(transfer_id, decision, *, user=None, request=None):
     """Approve/reject one pending transfer with row-level serialization."""
     transfer = (
-        Transfer.objects.select_for_update()
+        Transfer.objects.select_for_update(of=("self",))
         .select_related("athlete", "to_club")
         .get(pk=transfer_id)
     )

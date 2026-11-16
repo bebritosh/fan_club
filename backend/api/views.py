@@ -425,7 +425,7 @@ class AthleteViewSet(viewsets.ModelViewSet):
             raise ValidationError({"value": ["Клуб не найден."]})
         affected = 0
         with transaction.atomic():
-            for athlete in queryset.select_for_update():
+            for athlete in queryset.select_for_update(of=("self",)):
                 if operation == "set_status":
                     athlete.status = status_value
                     athlete.save(update_fields=["status"])

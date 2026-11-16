@@ -6,6 +6,12 @@ from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(BASE_DIR / ".env", override=True)
+except ImportError:  # python-dotenv is optional at runtime
+    pass
+
 
 def env_bool(name, default=False):
     value = os.getenv(name)
@@ -16,11 +22,11 @@ def env_csv(name, default):
     return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
 
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "development-only-fan-club-local-secret-key-rotate-in-production")
-DEBUG = env_bool("DJANGO_DEBUG", True)
+SECRET_KEY = os.environ.get("SECRET_KEY", "development-only-fan-club-local-secret-key-rotate-in-production")
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 if not DEBUG and SECRET_KEY == "development-only-fan-club-local-secret-key-rotate-in-production":
     raise ImproperlyConfigured("Задайте DJANGO_SECRET_KEY для production-режима.")
-ALLOWED_HOSTS = env_csv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -61,7 +67,26 @@ TEMPLATES = [
 ]
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
+DB_ENGINE = os.environ.get("DB_ENGINE", "postgres")
+
+if DB_ENGINE == "sqlite":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("DB_NAME", "fanclub"),
+            "USER": os.environ.get("DB_USER", "fanclub"),
+            "PASSWORD": os.environ.get("DB_PASSWORD", "fanclub_dev_pass"),
+            "HOST": os.environ.get("DB_HOST", "localhost"),
+            "PORT": os.environ.get("DB_PORT", "5432"),
+        }
+    }
 LANGUAGE_CODE = "ru-ru"
 TIME_ZONE = os.getenv("DJANGO_TIME_ZONE", "Asia/Almaty")
 USE_I18N = True
