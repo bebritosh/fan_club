@@ -1,6 +1,20 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { IconBell, IconCalendar, IconChartBar, IconFileText, IconHome, IconLogout, IconMenu2, IconSearch, IconSettings, IconTransfer, IconUsers, IconX } from '@tabler/icons-react';
+import {
+  IconBell,
+  IconBuildingStadium,
+  IconCalendar,
+  IconChartBar,
+  IconFileText,
+  IconHome,
+  IconLogout,
+  IconMenu2,
+  IconSearch,
+  IconSettings,
+  IconTransfer,
+  IconUsers,
+  IconX,
+} from '@tabler/icons-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import './Layout.css';
@@ -8,6 +22,7 @@ import './Layout.css';
 const nav = [
   { to: '/', label: 'Главная', icon: IconHome },
   { to: '/athletes', label: 'База спортсменов', icon: IconUsers },
+  { to: '/clubs', label: 'Клубы', icon: IconBuildingStadium },
   { to: '/analytics', label: 'Аналитика', icon: IconChartBar },
   { to: '/reports', label: 'Отчёты', icon: IconFileText },
   { to: '/events', label: 'Календарь', icon: IconCalendar },

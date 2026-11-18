@@ -1,0 +1,187 @@
+.fc-shell {
+  overflow-x: clip;
+}
+
+.fc-main,
+.fc-content {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.fc-content > * {
+  min-width: 0;
+}
+
+.fc-content > .tr-page,
+.fc-content > .cal-page,
+.fc-content > .cl-page,
+.fc-content > .st-page {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.fc-ath-layout,
+.fc-dash-grid,
+.fc-an-grid,
+.fc-an-two {
+  min-width: 0;
+}
+
+.fc-ath-layout > *,
+.fc-dash-grid > *,
+.fc-an-grid > *,
+.fc-an-two > * {
+  min-width: 0;
+}
+
+.fc-topbar {
+  max-width: 100%;
+}
+
+.fc-search {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .fc-tabs,
+  .tr-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .fc-tabs::-webkit-scrollbar,
+  .tr-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .fc-tab,
+  .tr-tabs button {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .fc-table-wrap,
+  .tr-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .fc-sidebar {
+    width: min(280px, 82vw);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  }
+
+  .fc-ath-layout,
+  .fc-an-grid,
+  .fc-an-two,
+  .fc-dash-grid,
+  .cal-layout,
+  .st-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .fc-topbar {
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .fc-burger {
+    flex: none;
+  }
+
+  .fc-search {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .fc-search input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .fc-top-right {
+    flex: none;
+    margin-left: 0;
+    gap: 6px;
+  }
+
+  .fc-content {
+    padding: 16px 12px 32px;
+  }
+
+  .fc-page-head,
+  .tr-head,
+  .cal-head,
+  .cl-head {
+    align-items: stretch;
+  }
+
+  .fc-page-head h1,
+  .tr-head h1,
+  .cal-head h1,
+  .cl-head h1,
+  .st-head h1 {
+    font-size: 22px !important;
+  }
+
+  .cal-primary,
+  .cl-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .fc-modal-backdrop,
+  .cal-backdrop,
+  .cl-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .fc-modal,
+  .cal-modal,
+  .cl-modal {
+    width: 100%;
+    max-height: 94vh;
+    padding: 20px 16px;
+    border-radius: 18px 18px 0 0;
+  }
+
+  .fc-modal-foot,
+  .cal-actions,
+  .cl-actions {
+    flex-direction: column-reverse;
+  }
+
+  .fc-modal-foot > *,
+  .cal-actions > *,
+  .cl-actions > * {
+    width: 100%;
+  }
+
+  .cal-grid {
+    gap: 4px;
+  }
+
+  .cal-card,
+  .st-card {
+    padding: 14px;
+  }
+
+  .toast-stack {
+    top: 70px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}

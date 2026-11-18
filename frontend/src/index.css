@@ -2,6 +2,7 @@
 @import './theme.css';
 @import './pages/legacy.css';
 @import './ui.css';
+@import './mobile.css';
 
 :root{font-family:'Inter','DM Sans',sans-serif;font-synthesis:none;text-rendering:optimizeLegibility;font-size:16px}
 *{box-sizing:border-box}
