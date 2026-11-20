@@ -4,35 +4,49 @@ import {
   IconArrowRight,
   IconCheck,
   IconClock,
+  IconLoader2,
   IconSearch,
   IconTransfer,
 } from '@tabler/icons-react';
 import { getTransfers, updateTransfer } from '../services/api';
 import { useToast } from '../context/ToastContext.jsx';
+import './EntityPages.css';
 import './TransfersPage.css';
 
-const FILTERS = ['Все переходы', 'Одобрен', 'В процессе'];
+const ALL = 'Все переходы';
+const APPROVED = 'Одобрен';
+const PENDING = 'В процессе';
+const REJECTED = 'Отклонён';
+const FILTERS = [ALL, APPROVED, PENDING, REJECTED];
 
 const initials = (name = '') =>
   name
     .split(' ')
-    .map((w) => w[0])
+    .map((word) => word[0])
     .slice(0, 2)
     .join('')
     .toUpperCase();
 
-const formatDate = (d) =>
-  new Date(`${d}T00:00:00`).toLocaleDateString('ru-RU', {
+const formatDate = (date) =>
+  new Date(`${date}T00:00:00`).toLocaleDateString('ru-RU', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
   });
 
+const badgeClass = (status) => {
+  if (status === APPROVED) return 'ok';
+  if (status === PENDING) return 'wait';
+  return 'no';
+};
+
 export default function TransfersHistory() {
   const notify = useToast();
   const [rows, setRows] = useState([]);
-  const [filter, setFilter] = useState('Все переходы');
+  const [filter, setFilter] = useState(ALL);
   const [query, setQuery] = useState('');
+  const [busyId, setBusyId] = useState(null);
+  const [rejecting, setRejecting] = useState(null);
 
   const refresh = () => getTransfers().then(setRows);
 
@@ -41,17 +55,16 @@ export default function TransfersHistory() {
   }, []);
 
   const count = (status) =>
-    status === 'Все переходы'
-      ? rows.length
-      : rows.filter((r) => r.status === status).length;
+    status === ALL ? rows.length : rows.filter((row) => row.status === status).length;
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
+
     return rows.filter(
-      (r) =>
-        (filter === 'Все переходы' || r.status === filter) &&
+      (row) =>
+        (filter === ALL || row.status === filter) &&
         (!q ||
-          [r.athlete_name, r.from, r.to]
+          [row.athlete_name, row.from, row.to]
             .join(' ')
             .toLowerCase()
             .includes(q))
@@ -59,16 +72,21 @@ export default function TransfersHistory() {
   }, [rows, filter, query]);
 
   const totalAmount = rows
-    .filter((r) => r.status === 'Одобрен')
-    .reduce((s, r) => s + Number(r.amount || 0), 0);
+    .filter((row) => row.status === APPROVED)
+    .reduce((sum, row) => sum + Number(row.amount || 0), 0);
 
-  const approve = async (row) => {
+  const changeStatus = async (row, status, successText) => {
+    setBusyId(row.id);
+
     try {
-      await updateTransfer(row.id, { status: 'Одобрен' });
+      await updateTransfer(row.id, { status });
       await refresh();
-      notify('Переход одобрен.');
+      setRejecting(null);
+      notify(successText);
     } catch {
       notify('Не удалось обновить статус перехода.', 'error');
+    } finally {
+      setBusyId(null);
     }
   };
 
@@ -83,21 +101,27 @@ export default function TransfersHistory() {
 
       <div className="tr-stats">
         <div className="tr-stat">
-          <span className="tr-stat-icon blue"><IconTransfer size={20} /></span>
+          <span className="tr-stat-icon blue">
+            <IconTransfer size={20} />
+          </span>
           <div>
             <small>Всего переходов</small>
             <b>{rows.length}</b>
           </div>
         </div>
         <div className="tr-stat">
-          <span className="tr-stat-icon orange"><IconClock size={20} /></span>
+          <span className="tr-stat-icon orange">
+            <IconClock size={20} />
+          </span>
           <div>
             <small>Ожидают решения</small>
-            <b>{count('В процессе')}</b>
+            <b>{count(PENDING)}</b>
           </div>
         </div>
         <div className="tr-stat">
-          <span className="tr-stat-icon green"><IconCheck size={20} /></span>
+          <span className="tr-stat-icon green">
+            <IconCheck size={20} />
+          </span>
           <div>
             <small>Сумма одобренных</small>
             <b>{totalAmount.toLocaleString('ru-RU')} ₸</b>
@@ -108,14 +132,14 @@ export default function TransfersHistory() {
       <section className="tr-card">
         <div className="tr-toolbar">
           <div className="tr-tabs">
-            {FILTERS.map((f) => (
+            {FILTERS.map((item) => (
               <button
-                key={f}
-                className={filter === f ? 'on' : ''}
-                onClick={() => setFilter(f)}
+                key={item}
+                className={filter === item ? 'on' : ''}
+                onClick={() => setFilter(item)}
               >
-                {f}
-                <span>{count(f)}</span>
+                {item}
+                <span>{count(item)}</span>
               </button>
             ))}
           </div>
@@ -140,53 +164,109 @@ export default function TransfersHistory() {
                 <th>Куда</th>
                 <th>Сумма</th>
                 <th>Статус</th>
-                <th></th>
+                <th>Действия</th>
               </tr>
             </thead>
             <tbody>
-              {visible.map((r) => (
-                <tr key={r.id}>
-                  <td className="muted">{formatDate(r.date)}</td>
+              {visible.map((row) => (
+                <tr key={row.id}>
+                  <td className="muted">{formatDate(row.date)}</td>
                   <td>
-                    <Link className="tr-athlete" to={`/athletes/${r.athlete}`}>
-                      <span>{initials(r.athlete_name)}</span>
-                      <b>{r.athlete_name}</b>
+                    <Link className="tr-athlete" to={`/athletes/${row.athlete}`}>
+                      <span>{initials(row.athlete_name)}</span>
+                      <b>{row.athlete_name}</b>
                     </Link>
                   </td>
-                  <td>{r.from || 'Свободный агент'}</td>
-                  <td><IconArrowRight size={16} className="tr-arrow" /></td>
-                  <td>{r.to || 'Без клуба'}</td>
+                  <td>{row.from || 'Свободный агент'}</td>
+                  <td>
+                    <IconArrowRight size={16} className="tr-arrow" />
+                  </td>
+                  <td>{row.to || 'Без клуба'}</td>
                   <td className="tr-amount">
-                    {r.amount
-                      ? `${Number(r.amount).toLocaleString('ru-RU')} ₸`
+                    {row.amount
+                      ? `${Number(row.amount).toLocaleString('ru-RU')} ₸`
                       : '—'}
                   </td>
                   <td>
-                    <span
-                      className={`tr-badge ${
-                        r.status === 'Одобрен' ? 'ok' : 'wait'
-                      }`}
-                    >
+                    <span className={`tr-badge ${badgeClass(row.status)}`}>
                       <i />
-                      {r.status}
+                      {row.status}
                     </span>
                   </td>
                   <td>
-                    {r.status === 'В процессе' && (
-                      <button className="tr-approve" onClick={() => approve(r)}>
-                        <IconCheck size={15} /> Одобрить
-                      </button>
+                    {row.status === PENDING && (
+                      <div className="tr-actions">
+                        <button
+                          className="tr-approve"
+                          disabled={busyId === row.id}
+                          onClick={() => changeStatus(row, APPROVED, 'Переход одобрен.')}
+                        >
+                          {busyId === row.id ? (
+                            <IconLoader2 size={15} className="fc-spin" />
+                          ) : (
+                            <IconCheck size={15} />
+                          )}
+                          Одобрить
+                        </button>
+                        <button
+                          className="tr-reject"
+                          disabled={busyId === row.id}
+                          onClick={() => setRejecting(row)}
+                        >
+                          Отклонить
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
           {visible.length === 0 && (
             <div className="tr-empty">Переходов не найдено.</div>
           )}
         </div>
       </section>
+
+      {rejecting && (
+        <div
+          className="fc-confirm-backdrop"
+          onMouseDown={(e) => e.target === e.currentTarget && setRejecting(null)}
+        >
+          <section
+            className="fc-confirm-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="reject-title"
+          >
+            <h2 id="reject-title">Отклонить переход?</h2>
+            <p>
+              Вы уверены, что хотите отклонить перевод спортсмена{' '}
+              {rejecting.athlete_name}?
+            </p>
+            <div className="fc-confirm-actions">
+              <button
+                className="fc-btn fc-btn-ghost"
+                onClick={() => setRejecting(null)}
+                disabled={busyId === rejecting.id}
+              >
+                Отмена
+              </button>
+              <button
+                className="fc-btn-danger"
+                onClick={() => changeStatus(rejecting, REJECTED, 'Переход отклонён.')}
+                disabled={busyId === rejecting.id}
+              >
+                {busyId === rejecting.id && (
+                  <IconLoader2 size={16} className="fc-spin" />
+                )}
+                Отклонить
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

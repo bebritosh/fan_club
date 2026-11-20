@@ -7,10 +7,10 @@ import AthleteProfile from './pages/AthleteProfile.jsx';
 import ClubsDirectory from './pages/ClubsDirectory.jsx';
 import TransfersHistory from './pages/TransfersHistory.jsx';
 import EventsCalendar from './pages/EventsCalendar.jsx';
-import Analytics from './pages/Analytics.jsx';
 import Reports from './pages/Reports.jsx';
 import Settings from './pages/Settings.jsx';
 import AuthPage from './pages/AuthPage.jsx';
+import Analytics from './pages/Analytics.jsx';
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -45,7 +45,7 @@ export default function App() {
         <Route path="clubs" element={<ClubsDirectory />} />
         <Route path="transfers" element={<TransfersHistory />} />
         <Route path="events" element={<EventsCalendar />} />
-        <Route path="analytics" element={<Analytics />} />
+        <Route path="analytics" element={<Analytics />} /> 
         <Route path="reports" element={<Reports />} />
         <Route path="settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/" replace />} />

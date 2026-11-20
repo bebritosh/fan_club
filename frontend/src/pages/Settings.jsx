@@ -1,12 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  IconBell,
-  IconCheck,
-  IconLock,
-  IconPhoto,
-  IconShieldCheck,
-  IconUser,
-} from '@tabler/icons-react';
+import { IconBell, IconLock, IconPhoto, IconUser } from '@tabler/icons-react';
 import { changePassword, updateProfile } from '../services/api';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
@@ -16,7 +9,6 @@ const TABS = [
   { id: 'profile', label: 'Профиль', icon: IconUser },
   { id: 'security', label: 'Безопасность', icon: IconLock },
   { id: 'notifications', label: 'Уведомления', icon: IconBell },
-  { id: 'access', label: 'Доступ', icon: IconShieldCheck },
 ];
 
 const NOTIFICATIONS = [
@@ -155,7 +147,7 @@ export default function Settings() {
           {tab === 'profile' && (
             <form onSubmit={saveProfile}>
               <h2>Личные данные</h2>
-              <p className="st-sub">Информация вашего профиля менеджера.</p>
+              <p className="st-sub">Информация вашего профиля.</p>
 
               <div className="st-avatar-row">
                 <div className="st-avatar">
@@ -285,27 +277,6 @@ export default function Settings() {
                     </button>
                   </div>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {tab === 'access' && (
-            <div>
-              <h2>Права доступа</h2>
-              <p className="st-sub">Уровень доступа в системе федерации.</p>
-
-              <div className="st-access">
-                <span className="st-role">
-                  <IconShieldCheck size={16} />
-                  Менеджер
-                </span>
-                <div>
-                  <b>Полный доступ к рабочему пространству</b>
-                  <small>
-                    Управление спортсменами, клубами, событиями и аналитикой.
-                  </small>
-                </div>
-                <IconCheck size={22} className="st-check" />
               </div>
             </div>
           )}

@@ -1,9 +1,14 @@
 from datetime import date, time, timedelta
 from decimal import Decimal
-from django.core.management.base import BaseCommand
+
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from django.core.management import call_command
+from django.core.management.base import BaseCommand
 from django.utils import timezone
+
 from api.models import Athlete, Club, Event, Transfer
+
 
 class Command(BaseCommand):
     help = "Creates a realistic demo dataset and a local demo manager account."
@@ -25,6 +30,24 @@ class Command(BaseCommand):
             event,_=Event.objects.update_or_create(title=title,defaults={"type":kind,"date":today+timedelta(days=days),"time":time(18,30),"location":loc,"description":"Событие федерации. Регистрация участников открыта."}); event.clubs.set([clubs[j] for j in indices])
         for i,athlete in enumerate(athletes[:12]):
             Transfer.objects.update_or_create(athlete=athlete,defaults={"date":today-timedelta(days=20+i*9),"from_club":clubs[(i+2)%5],"to_club":athlete.club,"amount":Decimal(12500000+i*250000),"status":"Одобрен" if i%2==0 else "В процессе","note":"Демо переход"})
-        User=get_user_model()
-        if not User.objects.filter(username="manager").exists(): User.objects.create_user(username="manager",email="manager@fanclub.local",password="FanClub2026!",first_name="Алия",last_name="Мухамедова",title="Менеджер системы")
+        User = get_user_model()
+        call_command("setup_roles", verbosity=0)
+        manager_group, _ = Group.objects.get_or_create(name="manager")
+        manager, _ = User.objects.get_or_create(
+            username="manager",
+            defaults={
+                "email": "manager@fanclub.local",
+                "first_name": "Алия",
+                "last_name": "Мухамедова",
+                "title": "Менеджер системы",
+            },
+        )
+        manager.email = "manager@fanclub.local"
+        manager.first_name = "Алия"
+        manager.last_name = "Мухамедова"
+        manager.title = "Менеджер системы"
+        manager.is_staff = True
+        manager.set_password("FanClub2026!")
+        manager.save()
+        manager.groups.add(manager_group)
         self.stdout.write(self.style.SUCCESS(f"Готово: {len(clubs)} клубов, {len(athletes)} спортсменов, {Event.objects.count()} событий. Демо вход: manager / FanClub2026!"))

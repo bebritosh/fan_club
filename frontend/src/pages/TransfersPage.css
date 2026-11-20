@@ -99,3 +99,36 @@
   .tr-stats { grid-template-columns: 1fr; }
   .tr-search { width: 100%; }
 }
+
+.tr-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tr-reject {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(240, 98, 107, 0.4);
+  border-radius: 8px;
+  background: rgba(240, 98, 107, 0.1);
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tr-reject:hover {
+  background: var(--red);
+  color: #1a0507;
+}
+
+.tr-approve:disabled,
+.tr-reject:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.tr-badge.no {
+  background: rgba(240, 98, 107, 0.16);
+  color: var(--red);
+}

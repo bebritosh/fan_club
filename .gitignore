@@ -11,3 +11,7 @@ backend/media/
 backend/server.log
 backend/server-error.log
 *.py[cod]
+.env
+db.sqlite3
+backend/data/imputed_fields.csv
+*.bak

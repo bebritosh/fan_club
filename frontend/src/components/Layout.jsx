@@ -50,56 +50,127 @@ export function FcadLogo({ size = 26 }) {
 
 export default function Layout() {
   const [open, setOpen] = useState(false);
-  const [q, setQ] = useState('');
+  const [query, setQuery] = useState('');
   const { user, logout } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
-  const name = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.username || 'Менеджер';
-  const initials = name.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
-  const today = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
 
-  const search = e => {
+  const name =
+    [user?.first_name, user?.last_name].filter(Boolean).join(' ') ||
+    user?.username ||
+    'Пользователь';
+
+  const initials = name
+    .split(' ')
+    .map((word) => word[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
+  const today = new Date().toLocaleDateString('ru-RU', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+
+  const search = (e) => {
     e.preventDefault();
-    navigate(`/athletes${q.trim() ? `?q=${encodeURIComponent(q.trim())}` : ''}`);
+    const text = query.trim();
+    navigate(`/athletes${text ? `?q=${encodeURIComponent(text)}` : ''}`);
   };
 
   return (
-    <div className="fc-shell">
+    <div className={`fc-shell ${user?.is_staff ? 'is-staff' : 'is-member'}`}>
       <aside className={`fc-sidebar ${open ? 'open' : ''}`}>
         <div className="fc-sidebar-head">
           <FcadLogo />
-          <button className="fc-close" onClick={() => setOpen(false)} aria-label="Закрыть меню"><IconX size={20} /></button>
+          <button
+            className="fc-close"
+            onClick={() => setOpen(false)}
+            aria-label="Закрыть меню"
+          >
+            <IconX size={20} />
+          </button>
         </div>
+
         <nav className="fc-nav">
           {nav.map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to} end={to === '/'} onClick={() => setOpen(false)} className={({ isActive }) => `fc-link ${isActive ? 'active' : ''}`}>
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              onClick={() => setOpen(false)}
+              className={({ isActive }) => `fc-link ${isActive ? 'active' : ''}`}
+            >
               <Icon size={19} stroke={1.7} />
               <span>{label}</span>
             </NavLink>
           ))}
         </nav>
+
         <div className="fc-sidebar-foot">FCAD · 2026</div>
       </aside>
 
       <div className="fc-main">
         <header className="fc-topbar">
-          <button className="fc-burger" onClick={() => setOpen(true)} aria-label="Меню"><IconMenu2 size={22} /></button>
+          <button
+            className="fc-burger"
+            onClick={() => setOpen(true)}
+            aria-label="Открыть меню"
+          >
+            <IconMenu2 size={22} />
+          </button>
+
           <form className="fc-search" onSubmit={search}>
             <IconSearch size={17} />
-            <input value={q} onChange={e => setQ(e.target.value)} placeholder="Поиск по имени, ID, клубу..." />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Поиск по имени или клубу…"
+            />
           </form>
+
           <div className="fc-top-right">
             <span className="fc-date">{today}</span>
-            <button className="fc-icon-btn" onClick={() => toast('Новых уведомлений нет.')} aria-label="Уведомления"><IconBell size={18} /><i /></button>
-            <button className="fc-icon-btn" onClick={() => { logout(); toast('Вы вышли из системы.'); }} aria-label="Выйти"><IconLogout size={18} /></button>
-            <button className="fc-avatar" onClick={() => navigate('/settings')} title={name}>
+            <button
+              className="fc-icon-btn"
+              onClick={() => toast('Новых уведомлений нет.')}
+              aria-label="Уведомления"
+            >
+              <IconBell size={18} />
+            </button>
+            <button
+              className="fc-icon-btn"
+              onClick={() => {
+                logout();
+                toast('Вы вышли из системы.');
+              }}
+              aria-label="Выйти"
+            >
+              <IconLogout size={18} />
+            </button>
+            <button
+              className="fc-avatar"
+              onClick={() => navigate('/settings')}
+              title={name}
+            >
               {user?.avatar_url ? <img src={user.avatar_url} alt="" /> : initials}
             </button>
           </div>
         </header>
-        <main className="fc-content"><Outlet /></main>
+
+        <main className="fc-content">
+          <Outlet />
+        </main>
       </div>
-      {open && <button className="fc-scrim" onClick={() => setOpen(false)} aria-label="Закрыть меню" />}
+
+      {open && (
+        <button
+          className="fc-scrim"
+          onClick={() => setOpen(false)}
+          aria-label="Закрыть меню"
+        />
+      )}
     </div>
   );
 }

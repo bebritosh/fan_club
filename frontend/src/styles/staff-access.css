@@ -1,0 +1,8 @@
+.fc-shell.is-member .fc-page-actions .fc-btn-primary,
+.fc-shell.is-member .fc-prof-actions,
+.fc-shell.is-member .cl-head .cl-primary,
+.fc-shell.is-member .cl-delete,
+.fc-shell.is-member .cal-head .cal-primary,
+.fc-shell.is-member .cal-delete {
+  display: none !important;
+}
