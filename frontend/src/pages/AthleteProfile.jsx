@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { IconArrowLeft, IconArrowUpRight, IconPencil, IconTrash, IconTrophy } from '@tabler/icons-react';
+import { IconArrowLeft,IconArrowsLeftRight, IconArrowUpRight, IconDownload, IconPencil, IconTrash, IconTrophy } from '@tabler/icons-react';
 import { CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { deleteAthlete, getAthlete, getClubs } from '../services/api';
 import { buildMetrics } from '../services/mockData';
@@ -10,6 +10,8 @@ import Avatar from '../components/Avatar.jsx';
 import BodySilhouette from '../components/BodySilhouette.jsx';
 import EditAthleteModal from '../components/EditAthleteModal.jsx';
 import './ProfilePage.css';
+import ExportReportModal from '../components/ExportReportModal.jsx';
+import CompareModal from '../components/CompareModal.jsx';
 
 const TABS = ['Обзор', 'Антропометрия', 'Состав тела', 'Физ. подготовка', 'Травмы', 'Трансферы', 'История'];
 
@@ -157,6 +159,8 @@ export default function AthleteProfile() {
   const [error, setError] = useState(false);
   const [tab, setTab] = useState('Обзор');
   const [editing, setEditing] = useState(false);
+    const [exporting, setExporting] = useState(false);
+      const [comparing, setComparing] = useState(false);
 
   const refresh = () => getAthlete(id).then(setA).catch(() => setError(true));
 
@@ -197,9 +201,19 @@ export default function AthleteProfile() {
 
   return (
     <div>
-      <Link to="/athletes" className="fc-back">
-        <IconArrowLeft size={17} /> Назад
-      </Link>
+        <div className="fc-prof-top">
+        <Link to="/athletes" className="fc-back">
+          <IconArrowLeft size={17} /> Назад
+        </Link>
+        <div className="fc-prof-top-actions">
+          <button className="fc-btn fc-btn-ghost" onClick={() => setComparing(true)}>
+            <IconArrowsLeftRight size={16} /> Сравнить
+          </button>
+          <button className="fc-btn fc-btn-primary" onClick={() => setExporting(true)}>
+            <IconDownload size={16} /> Экспорт отчёта
+          </button>
+        </div>
+      </div>
 
       {/* Шапка профиля */}
       <section className="fc-card fc-prof-head">
@@ -335,6 +349,17 @@ export default function AthleteProfile() {
           onClose={() => setEditing(false)}
           onSaved={() => { setEditing(false); refresh(); }}
         />
+      )}
+            {exporting && (
+        <ExportReportModal
+          athlete={a}
+          metrics={metrics}
+          notify={notify}
+          onClose={() => setExporting(false)}
+        />
+      )}
+            {comparing && (
+        <CompareModal athlete={a} onClose={() => setComparing(false)} />
       )}
     </div>
   );
